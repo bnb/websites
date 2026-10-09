@@ -1,0 +1,40 @@
+/* tierneycyren.com, "Laser": a UV-black dancefloor, tall condensed type and
+   a cyan laser accent, with magenta for the odd flash. It shares Archivo and
+   IBM Plex Mono with tierney.camera, pulled narrow instead of wide. */
+[data-theme='dj'] {
+	--bg: #0c0716;
+	--bg-soft: #1a1028;
+	--line: rgba(244, 239, 255, 0.14);
+	--line-strong: rgba(244, 239, 255, 0.3);
+	--ink: #f4efff;
+	--ink-dim: #a99cc4;
+	--ink-faint: #8f82ab;
+	--accent: #00f0ff;
+	--accent-ink: #0c0716;
+	--highlight: #ff3df2;
+	--highlight-ink: #0c0716;
+
+	--pad: clamp(16px, 3.4cqi, 48px);
+	--rule: 1px;
+	--ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+	--display: 'Archivo Variable', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+	--body: var(--display);
+	--mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+	--display-weight: 900;
+	--display-stretch: 62%;
+
+	/* components */
+	--name-size: clamp(64px, 24cqi, 360px);
+	--name-leading: 0.78;
+	--name-tracking: -0.01em;
+	--marquee-size: clamp(20px, 2.4cqi, 34px);
+	--marquee-weight: 800;
+	--marquee-stretch: 62%;
+	--marquee-pad: 12px 0;
+	--marquee-duration: 40s;
+	--signoff-size: 13cqi;
+	--signoff-leading: 0.8;
+
+	color-scheme: dark;
+}

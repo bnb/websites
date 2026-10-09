@@ -1,0 +1,55 @@
+{
+  "name": "websites",
+  "private": true,
+  "description": "Tierney Cyren's websites: bnb.im, tierney.camera and tierneycyren.com, on one SvelteKit stack with a shared design system.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -c auto npm:dev:* npm:storybook",
+    "dev:bnb": "npm run dev -w apps/bnb.im",
+    "dev:camera": "npm run dev -w apps/tierney.camera",
+    "dev:dj": "npm run dev -w apps/tierneycyren.com",
+    "build": "npm run build --workspaces --if-present",
+    "check": "npm run check --workspaces --if-present",
+    "lint": "oxlint",
+    "lint:e18e": "eslint .",
+    "lint:all": "npm run lint && npm run lint:e18e",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "knip": "knip",
+    "test": "npm run test:unit && npm run test:storybook && npm run test:e2e",
+    "test:unit": "npm run test:unit --workspaces --if-present -- --run",
+    "test:coverage": "npm run test:coverage --workspaces --if-present",
+    "test:e2e": "npm run test:e2e --workspaces --if-present",
+    "test:storybook": "npm run test:storybook -w apps/styleguide",
+    "test:a11y": "npm run test:storybook && npm run test:a11y --workspaces --if-present",
+    "storybook": "npm run storybook -w apps/styleguide",
+    "build-storybook": "npm run build-storybook -w apps/styleguide",
+    "lighthouse": "npm run lighthouse --workspaces --if-present",
+    "verify": "npm run lint:all && npm run format:check && npm run knip && npm run check && npm run test:coverage && npm run test:storybook && npm run build"
+  },
+  "devDependencies": {
+    "@e18e/eslint-plugin": "^0.8.1",
+    "@types/node": "^24.0.0",
+    "@typescript-eslint/parser": "^8.71.0",
+    "concurrently": "^10.0.6",
+    "eslint": "^10.12.0",
+    "knip": "^6.39.0",
+    "oxfmt": "^0.68.0",
+    "oxlint": "^1.86.0",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "@sveltejs/kit": {
+      "cookie": "^0.7.2"
+    },
+    "fflate": "^0.8.2"
+  }
+}

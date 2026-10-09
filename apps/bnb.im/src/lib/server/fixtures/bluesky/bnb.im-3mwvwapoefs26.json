@@ -1,0 +1,184 @@
+{
+	"fetchedAt": 1791128995569,
+	"thread": {
+		"post": {
+			"uri": "at://did:plc:uashgn65n5z7aqwk5cbuba5c/app.bsky.feed.post/3mwvwapoefs26",
+			"cid": "bafyreidp3gg5xfnvxrh4e4wasv3hz7cvaqxsynp4hbt4rlofz7vvluvzrm",
+			"author": {
+				"did": "did:plc:uashgn65n5z7aqwk5cbuba5c",
+				"handle": "bnb.im",
+				"displayName": "tierney cyren",
+				"pronouns": "they/them",
+				"avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:uashgn65n5z7aqwk5cbuba5c/bafkreiewrybtca2tu47coq2tkp3fnuiqxqfk52im7wvlbq6cuw7k7jtvta",
+				"associated": {
+					"chat": { "allowIncoming": "all", "allowGroupInvites": "all" },
+					"activitySubscription": { "allowSubscriptions": "followers" },
+					"germ": {
+						"showButtonTo": "usersIFollow",
+						"messageMeUrl": "https://landing.ger.mx/newUser"
+					}
+				},
+				"labels": [],
+				"createdAt": "2023-04-21T15:11:12.314Z"
+			},
+			"record": {
+				"$type": "app.bsky.feed.post",
+				"createdAt": "2026-10-02T17:42:11.737Z",
+				"embed": {
+					"$type": "app.bsky.embed.record",
+					"record": {
+						"cid": "bafyreigv6rcwjknltesfkqzevocxmlhtk345e7lyqs5bra7thminjuk7km",
+						"uri": "at://did:plc:6folivh3kuvuljku7ytxwbbf/app.bsky.feed.post/3mwvuyiau3s2k"
+					}
+				},
+				"langs": ["en"],
+				"text": "think about it like an email account, except instead of just email you can publish blog posts, livestream, publish music, or do anything else you’d do on the internet\n\nyour Bluesky account has the ability to do that already already\n\nthis tab will just let you see all that stuff in the Bluesky app"
+			},
+			"embed": {
+				"record": {
+					"uri": "at://did:plc:6folivh3kuvuljku7ytxwbbf/app.bsky.feed.post/3mwvuyiau3s2k",
+					"cid": "bafyreigv6rcwjknltesfkqzevocxmlhtk345e7lyqs5bra7thminjuk7km",
+					"author": {
+						"did": "did:plc:6folivh3kuvuljku7ytxwbbf",
+						"handle": "eliasisquith.blog",
+						"displayName": "elias isquith",
+						"avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:6folivh3kuvuljku7ytxwbbf/bafkreidk42qncmocqwaekwudbshnvaddfibfu7dsabpwy6d245whfyulbe",
+						"associated": {
+							"chat": { "allowIncoming": "following" },
+							"activitySubscription": { "allowSubscriptions": "mutuals" }
+						},
+						"labels": [
+							{
+								"src": "did:plc:6folivh3kuvuljku7ytxwbbf",
+								"uri": "at://did:plc:6folivh3kuvuljku7ytxwbbf/app.bsky.actor.profile/self",
+								"cid": "bafyreibehafgjofnyd45hkpdr7y7sfi3bi42whch6cllj47qbyw7dujnby",
+								"val": "!no-unauthenticated",
+								"cts": "1970-01-01T00:00:00.000Z"
+							}
+						],
+						"createdAt": "2023-05-09T23:30:14.334Z",
+						"verification": {
+							"verifications": [
+								{
+									"issuer": "did:plc:z72i7hdynmk6r22z27h6tvur",
+									"issuerDisplayName": "Bluesky",
+									"issuerHandle": "bsky.app",
+									"uri": "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.graph.verification/3lti7dlh6zf2p",
+									"isValid": true,
+									"createdAt": "2025-07-08T21:05:47.996Z"
+								}
+							],
+							"verifiedStatus": "valid",
+							"trustedVerifierStatus": "none"
+						}
+					},
+					"value": {
+						"$type": "app.bsky.feed.post",
+						"createdAt": "2026-10-02T17:19:41.778Z",
+						"embed": {
+							"$type": "app.bsky.embed.record",
+							"record": {
+								"cid": "bafyreicmemgqtfbao72kup3mkbvvnma6l675dizyje4yw2qlfw6qjuqgve",
+								"uri": "at://did:plc:3jpt2mvvsumj2r7eqk4gzzjz/app.bsky.feed.post/3mwvubwklik2y"
+							}
+						},
+						"langs": ["en"],
+						"text": "i dont understand tech.\n\nwould this basically mean you could have bluesky directly connect with some blogging platform in a way that provides benefits beyond...linking to the blog, i guess? like, what's the advantage here for a tech illiterate such as myself (sincere Q, not rhetorical)?"
+					},
+					"labels": [],
+					"likeCount": 20,
+					"replyCount": 4,
+					"repostCount": 1,
+					"quoteCount": 1,
+					"indexedAt": "2026-10-02T17:19:41.974Z",
+					"embeds": [
+						{
+							"record": {
+								"uri": "at://did:plc:3jpt2mvvsumj2r7eqk4gzzjz/app.bsky.feed.post/3mwvubwklik2y",
+								"cid": "bafyreicmemgqtfbao72kup3mkbvvnma6l675dizyje4yw2qlfw6qjuqgve",
+								"author": {
+									"did": "did:plc:3jpt2mvvsumj2r7eqk4gzzjz",
+									"handle": "esb.lol",
+									"displayName": "Eric",
+									"avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:3jpt2mvvsumj2r7eqk4gzzjz/bafkreicmpkhaggfoagqj53jmzfmremae2qcw7oc3ugh5qvq6quncxp6wqq",
+									"associated": {
+										"chat": { "allowIncoming": "following", "allowGroupInvites": "following" },
+										"activitySubscription": { "allowSubscriptions": "followers" }
+									},
+									"labels": [],
+									"createdAt": "2023-05-02T03:39:27.863Z",
+									"verification": {
+										"verifications": [
+											{
+												"issuer": "did:plc:z72i7hdynmk6r22z27h6tvur",
+												"issuerDisplayName": "Bluesky",
+												"issuerHandle": "bsky.app",
+												"uri": "at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.graph.verification/3ltmvuidftv2f",
+												"isValid": true,
+												"createdAt": "2025-07-10T17:59:36.528Z"
+											}
+										],
+										"verifiedStatus": "valid",
+										"trustedVerifierStatus": "none"
+									}
+								},
+								"value": {
+									"$type": "app.bsky.feed.post",
+									"createdAt": "2026-10-02T17:07:05.026Z",
+									"embed": {
+										"$type": "app.bsky.embed.images",
+										"images": [
+											{
+												"alt": "Sneak peek at something the Bluesky team is working on. Screenshot shows the Bluesky app with the drawer open, with a new drawer menu item called \"Atmosphere (Beta)\". The content to the right shows what an activity feed of stuff happening in the Atmosphere might look like. All content is WIP, we'll share more soon.",
+												"aspectRatio": { "height": 2292, "width": 1172 },
+												"image": {
+													"$type": "blob",
+													"ref": {
+														"$link": "bafkreibh3ugyrfdii2bzcoxfa24zk4woxj25isen6fgu2n5rykbaofvjka"
+													},
+													"mimeType": "image/jpeg",
+													"size": 731028
+												}
+											}
+										]
+									},
+									"langs": ["en"],
+									"reply": {
+										"parent": {
+											"cid": "bafyreia2trx6xm7wrxpnh3lxead5xp52sbwwivpkckgy245urcxbvr57ye",
+											"uri": "at://did:plc:tahmjtpwnkuhopngqe5q7jp2/app.bsky.feed.post/3mwvohkpym22v"
+										},
+										"root": {
+											"cid": "bafyreia2trx6xm7wrxpnh3lxead5xp52sbwwivpkckgy245urcxbvr57ye",
+											"uri": "at://did:plc:tahmjtpwnkuhopngqe5q7jp2/app.bsky.feed.post/3mwvohkpym22v"
+										}
+									},
+									"text": "You read our minds 😏 we'll share more soon!"
+								},
+								"labels": [],
+								"likeCount": 246,
+								"replyCount": 18,
+								"repostCount": 40,
+								"quoteCount": 21,
+								"indexedAt": "2026-10-02T17:07:07.162Z",
+								"$type": "app.bsky.embed.record#viewRecord"
+							},
+							"$type": "app.bsky.embed.record#view"
+						}
+					],
+					"$type": "app.bsky.embed.record#viewRecord"
+				},
+				"$type": "app.bsky.embed.record#view"
+			},
+			"bookmarkCount": 3,
+			"replyCount": 4,
+			"repostCount": 5,
+			"likeCount": 16,
+			"quoteCount": 2,
+			"indexedAt": "2026-10-02T17:42:12.161Z",
+			"labels": []
+		},
+		"threadContext": {},
+		"$type": "app.bsky.feed.defs#threadViewPost"
+	}
+}

@@ -1,0 +1,95 @@
+/* tierneycyren.com's own globals. The theme tokens ("Laser": UV black, cyan
+   and magenta, condensed Archivo) come from @bnb/ui/themes/dj.css, selected by
+   <html data-theme="dj">. */
+*,
+*::before,
+*::after {
+	margin: 0;
+	padding: 0;
+}
+
+html {
+	background: var(--bg);
+}
+
+/* How hard the music hits, 0–1: set each frame on the masthead while a mix
+   plays, and steadier values on the mix list (see the components). The lasers
+   sweep by --sweep. Registered so they have resting values and can transition. */
+@property --energy {
+	syntax: '<number>';
+	inherits: true;
+	initial-value: 0;
+}
+@property --sweep {
+	syntax: '<angle>';
+	inherits: true;
+	initial-value: 0deg;
+}
+
+/* Blacklight: the big type glows UV, faintly at rest and brighter with
+   --energy. The glow sits behind the letters, so their contrast holds. */
+h1,
+h2,
+h3 {
+	text-shadow: 0 0 calc(0.05em + var(--energy) * 0.12em)
+		color-mix(in srgb, var(--accent) calc(24% + var(--energy) * 36%), transparent);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html {
+		scroll-behavior: smooth;
+	}
+}
+
+body {
+	min-height: 100vh;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--display);
+	font-weight: 400;
+	line-height: 1.5;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: optimizeLegibility;
+	overflow-x: hidden;
+}
+
+::selection {
+	background: var(--highlight);
+	color: var(--highlight-ink);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+	transition: color 0.2s var(--ease);
+}
+a:hover {
+	color: var(--accent);
+}
+
+:focus-visible {
+	outline: 2px solid var(--accent);
+	outline-offset: 3px;
+}
+
+img {
+	display: block;
+	max-width: 100%;
+}
+
+.mono {
+	font-family: var(--mono);
+	font-size: 12px;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.001ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.001ms !important;
+	}
+}

@@ -1,0 +1,103 @@
+{
+	"fetchedAt": 1790978812791,
+	"thread": {
+		"post": {
+			"uri": "at://did:plc:uashgn65n5z7aqwk5cbuba5c/app.bsky.feed.post/3mwvyorvg5c26",
+			"cid": "bafyreihxtlfixcnz3lgleeg74usu4uz7dy2ugeamlrcu4wix7jcu3yiu7q",
+			"author": {
+				"did": "did:plc:uashgn65n5z7aqwk5cbuba5c",
+				"handle": "bnb.im",
+				"displayName": "tierney cyren",
+				"pronouns": "they/them",
+				"avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:uashgn65n5z7aqwk5cbuba5c/bafkreiewrybtca2tu47coq2tkp3fnuiqxqfk52im7wvlbq6cuw7k7jtvta",
+				"associated": {
+					"chat": { "allowIncoming": "all", "allowGroupInvites": "all" },
+					"activitySubscription": { "allowSubscriptions": "followers" },
+					"germ": {
+						"showButtonTo": "usersIFollow",
+						"messageMeUrl": "https://landing.ger.mx/newUser"
+					}
+				},
+				"labels": [],
+				"createdAt": "2023-04-21T15:11:12.314Z"
+			},
+			"record": {
+				"$type": "app.bsky.feed.post",
+				"createdAt": "2026-10-02T18:25:51.313Z",
+				"facets": [
+					{
+						"$type": "app.bsky.richtext.facet",
+						"features": [
+							{
+								"$type": "app.bsky.richtext.facet#mention",
+								"did": "did:plc:rbvrr34edl5ddpuwcubjiost"
+							}
+						],
+						"index": { "byteEnd": 23, "byteStart": 10 }
+					}
+				],
+				"langs": ["en"],
+				"reply": {
+					"parent": {
+						"cid": "bafyreiciz6bzh2pjyruodslgq7z26l2rtgzou3jd5mu7fafhdozqb4dw5q",
+						"uri": "at://did:plc:z3ohdsv5fvozyht6woavujt5/app.bsky.feed.post/3mwvwqjseuk2u"
+					},
+					"root": {
+						"cid": "bafyreidp3gg5xfnvxrh4e4wasv3hz7cvaqxsynp4hbt4rlofz7vvluvzrm",
+						"uri": "at://did:plc:uashgn65n5z7aqwk5cbuba5c/app.bsky.feed.post/3mwvwapoefs26"
+					}
+				},
+				"text": "yes, with @stream.place\n\nThe account you created when you created a Bluesky account is closer to the capability of a Google account than a Twitter account… Bluesky just built the Twitter app on top of that account and developers can build other apps on top of it too"
+			},
+			"bookmarkCount": 0,
+			"replyCount": 1,
+			"repostCount": 0,
+			"likeCount": 2,
+			"quoteCount": 0,
+			"indexedAt": "2026-10-02T18:25:51.672Z",
+			"labels": []
+		},
+		"parent": {
+			"post": {
+				"uri": "at://did:plc:z3ohdsv5fvozyht6woavujt5/app.bsky.feed.post/3mwvwqjseuk2u",
+				"cid": "bafyreiciz6bzh2pjyruodslgq7z26l2rtgzou3jd5mu7fafhdozqb4dw5q",
+				"author": {
+					"did": "did:plc:z3ohdsv5fvozyht6woavujt5",
+					"handle": "billthepony.bsky.social",
+					"displayName": "BillThePony",
+					"avatar": "https://cdn.bsky.app/img/avatar/plain/did:plc:z3ohdsv5fvozyht6woavujt5/bafkreicnyh26hbodwcyrzwguxt4dk47se4yesaqzbrox3uddpgzft5cdfa",
+					"associated": { "activitySubscription": { "allowSubscriptions": "followers" } },
+					"labels": [],
+					"createdAt": "2023-11-17T15:16:10.516Z"
+				},
+				"record": {
+					"$type": "app.bsky.feed.post",
+					"createdAt": "2026-10-02T17:51:02.451Z",
+					"langs": ["en"],
+					"reply": {
+						"parent": {
+							"cid": "bafyreidp3gg5xfnvxrh4e4wasv3hz7cvaqxsynp4hbt4rlofz7vvluvzrm",
+							"uri": "at://did:plc:uashgn65n5z7aqwk5cbuba5c/app.bsky.feed.post/3mwvwapoefs26"
+						},
+						"root": {
+							"cid": "bafyreidp3gg5xfnvxrh4e4wasv3hz7cvaqxsynp4hbt4rlofz7vvluvzrm",
+							"uri": "at://did:plc:uashgn65n5z7aqwk5cbuba5c/app.bsky.feed.post/3mwvwapoefs26"
+						}
+					},
+					"text": "Bsky can live stream? \n\nCould i live stream the podcast i do with my friend? We haven't set up an account here but i keep begging him to"
+				},
+				"bookmarkCount": 0,
+				"replyCount": 2,
+				"repostCount": 0,
+				"likeCount": 0,
+				"quoteCount": 0,
+				"indexedAt": "2026-10-02T17:51:06.277Z",
+				"labels": []
+			},
+			"threadContext": {},
+			"$type": "app.bsky.feed.defs#threadViewPost"
+		},
+		"threadContext": {},
+		"$type": "app.bsky.feed.defs#threadViewPost"
+	}
+}

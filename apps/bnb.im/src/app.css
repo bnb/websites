@@ -1,0 +1,857 @@
+/* bnb.im's own globals: the page, prose, code and Bluesky embeds. The tokens
+   (colours, type, --rule) come from @bnb/ui/themes/bnb.css, selected by
+   <html data-theme="bnb">. The header, marquee, posts table, meta strip,
+   subscribe box and footer are components with their own styles. */
+@import './lib/styles/print.css' print;
+
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font-family: var(--body);
+	font-size: 1.0625rem;
+	line-height: 1.55;
+}
+
+/* Pages crossfade, and the name and the marquee move to their new places
+   (SiteHeader names them until they start to scroll off). Motion is opt-in. */
+@media (prefers-reduced-motion: no-preference) {
+	@view-transition {
+		navigation: auto;
+	}
+}
+
+::view-transition-group(big-name),
+::view-transition-group(marquee) {
+	animation-duration: 0.5s;
+	animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* The two names have different shapes (two lines at home, one elsewhere), so
+   each is fitted into the moving box at its own aspect ratio, pinned top left,
+   and the old one hands over to the new one partway, rather than both being
+   stretched across it at once. */
+::view-transition-old(big-name),
+::view-transition-new(big-name) {
+	height: 100%;
+	object-fit: contain;
+	object-position: left top;
+}
+
+::view-transition-old(big-name) {
+	animation: 0.25s ease-in both page-fade reverse;
+}
+
+::view-transition-new(big-name) {
+	animation: 0.3s ease-out 0.15s both page-fade;
+}
+
+@keyframes page-fade {
+	from {
+		opacity: 0;
+	}
+}
+
+/* the marquee is the same band on every page: only the new one moves (or,
+   when the old one had scrolled away, fades in with the page) */
+::view-transition-old(marquee) {
+	animation: none;
+	opacity: 0;
+}
+
+::view-transition-new(marquee) {
+	animation: none;
+}
+
+::view-transition-new(marquee):only-child {
+	animation: 0.25s both page-fade;
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+}
+
+::selection {
+	background: var(--highlight);
+	color: var(--ink);
+}
+
+a {
+	color: inherit;
+	text-decoration: underline;
+	text-decoration-color: var(--accent);
+	text-decoration-thickness: 3px;
+	text-underline-offset: 0.15em;
+}
+
+a:hover {
+	background: var(--accent);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+	outline: var(--rule) solid var(--ink);
+	outline-offset: 2px;
+}
+
+a:focus-visible {
+	background: var(--highlight);
+}
+
+mark {
+	background: var(--highlight);
+	color: inherit;
+	padding: 0 0.12em;
+}
+
+.wrap {
+	width: min(72rem, 100% - 2rem);
+	margin-inline: auto;
+}
+
+/* posts and series pages */
+.back {
+	display: inline-block;
+	margin: 1.5rem 0 1rem;
+	font-family: var(--mono);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+}
+
+.post-title {
+	margin: 0 0 1.5rem;
+	font-family: var(--display);
+	font-weight: 400;
+	font-size: clamp(1.6rem, 7.5vw, 5.4rem);
+	line-height: 0.92;
+	letter-spacing: -0.025em;
+	text-transform: uppercase;
+	text-wrap: balance;
+	overflow-wrap: break-word;
+	hyphens: auto;
+}
+
+.prose {
+	max-width: 40rem;
+	font-size: 1.12rem;
+}
+
+.prose h2 {
+	margin: 2.5rem 0 0.6rem;
+	font-family: var(--display);
+	font-weight: 400;
+	font-size: 1.5rem;
+	line-height: 1.1;
+	text-transform: uppercase;
+	text-wrap: balance;
+}
+
+.prose h3 {
+	margin: 2rem 0 0.5rem;
+	font-size: 1.25rem;
+	line-height: 1.2;
+}
+
+.prose h4 {
+	margin: 1.75rem 0 0.5rem;
+	font-family: var(--mono);
+	font-weight: 400;
+	font-size: 0.9rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.prose li {
+	margin: 0.25rem 0;
+}
+
+.prose li::marker {
+	color: var(--accent);
+	font-weight: 700;
+}
+
+.prose code {
+	font-family: var(--mono);
+	font-size: 0.85em;
+	background: var(--highlight);
+	padding: 0 0.25em;
+}
+
+.prose :is(h2, h4) code {
+	text-transform: none;
+}
+
+.prose pre {
+	margin: 1.75rem 0;
+	padding: 1.1rem 1.25rem;
+	overflow-x: auto;
+	border: var(--rule) solid var(--ink);
+	background: var(--ink);
+	color: var(--bg);
+	box-shadow: 7px 7px 0 var(--accent);
+	font-size: 0.85rem;
+	line-height: 1.7;
+	tab-size: 2;
+}
+
+.prose pre code {
+	padding: 0;
+	background: none;
+	color: inherit;
+	font-size: inherit;
+}
+
+.prose blockquote:not(.bsky-embed) {
+	margin: 1.5rem 0;
+	padding: 0.25rem 0 0.25rem 1.25rem;
+	border-left: 6px solid var(--accent);
+}
+
+/* `> [!PULL]` pull quotes (see pull-quote.ts): a slab of highlighter */
+.prose blockquote.pull {
+	position: relative;
+	margin: 2.75rem 0 2.5rem;
+	padding: 1.6rem 1.6rem 1.4rem;
+	border: var(--rule) solid var(--ink);
+	background: var(--highlight);
+	box-shadow: 8px 8px 0 var(--ink);
+	rotate: -1deg;
+	font-family: var(--display);
+	font-size: clamp(1.35rem, 4cqi, 2.1rem);
+	line-height: 1.12;
+	text-transform: uppercase;
+	text-wrap: balance;
+}
+
+.prose blockquote.pull::before {
+	content: '\201C' / '';
+	position: absolute;
+	top: -0.42em;
+	left: 0.3em;
+	color: var(--accent);
+	font-size: 3em;
+	line-height: 1;
+	-webkit-text-stroke: 3px var(--ink);
+	paint-order: stroke fill;
+}
+
+.prose blockquote.pull p {
+	margin: 0;
+}
+
+.prose blockquote.pull p + p {
+	margin-top: 0.6em;
+}
+
+/* fenced code with a file name tab and a language sticker (markdown.ts) */
+.prose figure.code {
+	position: relative;
+	margin: 1.75rem 0;
+}
+
+.prose figure.code pre {
+	margin: 0;
+}
+
+.code-file {
+	display: inline-block;
+	max-width: calc(100% - 6rem);
+	padding: 0.35rem 0.85rem 0.2rem;
+	overflow: hidden;
+	background: var(--ink);
+	color: var(--bg);
+	font-family: var(--mono);
+	font-size: 0.78rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: bottom;
+}
+
+.code-lang {
+	position: absolute;
+	top: -0.75rem;
+	right: 0.9rem;
+	z-index: 1;
+	padding: 0.05rem 0.5rem;
+	border: 2px solid var(--ink);
+	background: var(--accent);
+	box-shadow: 2px 2px 0 var(--ink);
+	rotate: 4deg;
+	font-family: var(--mono);
+	font-size: 0.72rem;
+	text-transform: uppercase;
+}
+
+.code-file + .code-lang {
+	top: 0.75rem;
+}
+
+/* footnotes: the list at the end, and on wide screens each note beside its
+   first reference too (footnotes.ts puts the text in data-sidenote; the post
+   is the container) */
+.footnote-ref {
+	line-height: 0;
+}
+
+.footnote-ref a {
+	padding: 0 0.1em;
+	font-family: var(--mono);
+	font-size: 0.8rem;
+	text-decoration: none;
+}
+
+.prose .footnotes {
+	font-size: 0.95rem;
+}
+
+.footnote-backref {
+	text-decoration: none;
+}
+
+@container post (min-width: 62rem) {
+	.prose [data-sidenote]::after {
+		content: attr(data-sidenote) / '';
+		float: right;
+		clear: right;
+		width: 15rem;
+		margin: 0.35rem -18rem 0.75rem 0;
+		padding-left: 0.75rem;
+		border-left: var(--rule) solid var(--accent);
+		font-family: var(--body);
+		font-size: 0.85rem;
+		font-weight: 400;
+		line-height: 1.45;
+		text-transform: none;
+		vertical-align: baseline;
+		white-space: normal;
+	}
+}
+
+.prose img {
+	display: block;
+	border: var(--rule) solid var(--ink);
+}
+
+.prose table {
+	display: block;
+	max-width: 100%;
+	overflow-x: auto;
+	border-collapse: collapse;
+	margin: 1.5rem 0;
+	font-size: 0.95rem;
+}
+
+.prose th,
+.prose td {
+	padding: 0.45rem 0.7rem;
+	border: 2px solid var(--ink);
+	text-align: left;
+	vertical-align: top;
+}
+
+.prose th {
+	background: var(--highlight);
+}
+
+.prose hr {
+	margin: 2.5rem 0;
+	border: 0;
+	border-top: var(--rule) solid var(--ink);
+}
+
+/* the # permalinks markdown-it-anchor adds after headings */
+.direct-link {
+	margin-left: 0.35em;
+	color: var(--accent);
+	text-decoration: none;
+}
+
+.direct-link:hover {
+	background: none;
+	color: var(--ink);
+}
+
+@media (hover: hover) {
+	.direct-link {
+		opacity: 0;
+		transition: opacity 0.15s;
+	}
+
+	:is(h2, h3, h4):hover .direct-link {
+		opacity: 1;
+	}
+}
+
+.kicker {
+	width: fit-content;
+	margin: 0 0 0.75rem;
+	padding: 0 0.35rem;
+	background: var(--highlight);
+	font-family: var(--mono);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+}
+
+.lede {
+	max-width: 40rem;
+	margin: 0 0 1rem;
+	font-size: 1.3rem;
+	font-weight: 500;
+	line-height: 1.45;
+}
+
+/* bluesky post embeds, rendered at build time by src/lib/server/bluesky.ts */
+.bsky-embed {
+	margin: 2rem 0;
+	padding: 1rem 1.25rem;
+	border: var(--rule) solid var(--ink);
+	background: var(--bg);
+	box-shadow: 6px 6px 0 var(--ink);
+	font-size: 1rem;
+}
+
+.bsky-embed a {
+	text-decoration: none;
+}
+
+.bsky-embed-text a:hover,
+.bsky-embed-footer a:hover {
+	text-decoration: underline;
+}
+
+.bsky-embed-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+}
+
+.bsky-embed-author {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	min-width: 0;
+}
+
+.bsky-embed-avatar {
+	flex-shrink: 0;
+	width: 44px;
+	height: 44px;
+	border: 2px solid var(--ink);
+	border-radius: 50%;
+	background: var(--highlight);
+	object-fit: cover;
+}
+
+.bsky-embed-names {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	line-height: 1.3rem;
+}
+
+.bsky-embed-name {
+	font-weight: 700;
+}
+
+.bsky-embed-name,
+.bsky-embed-handle {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.bsky-embed-handle {
+	color: var(--ink-dim);
+	font-family: var(--mono);
+	font-size: 0.8rem;
+}
+
+.bsky-embed-logo {
+	flex-shrink: 0;
+	line-height: 0;
+	color: #1185fe;
+}
+
+.bsky-embed-logo svg {
+	fill: currentColor;
+}
+
+.bsky-embed-context {
+	margin: 0.75rem 0 0;
+	color: var(--ink-dim);
+	font-size: 0.85rem;
+	line-height: 1.3rem;
+}
+
+.bsky-embed-text {
+	margin: 0.75rem 0 0;
+	line-height: 1.6rem;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.bsky-embed-images,
+.bsky-embed-gallery,
+.bsky-embed-video,
+.bsky-embed-external,
+.bsky-embed-quote,
+.bsky-embed-notice {
+	margin: 0.75rem 0 0;
+}
+
+.bsky-embed-images {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-auto-rows: minmax(0, 1fr);
+	gap: var(--rule);
+	aspect-ratio: 3 / 2;
+	max-width: 100%;
+	border: var(--rule) solid var(--ink);
+	background: var(--ink);
+	overflow: hidden;
+}
+
+.bsky-embed-images[data-count='2'] {
+	aspect-ratio: 2 / 1;
+}
+
+.bsky-embed-images[data-count='3'] a:first-child {
+	grid-row: span 2;
+}
+
+.bsky-embed-images a {
+	display: block;
+	overflow: hidden;
+}
+
+.bsky-embed-images img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.bsky-embed-images[data-count='1'] {
+	display: block;
+	aspect-ratio: auto;
+	border: 0;
+	background: none;
+}
+
+.bsky-embed-images[data-count='1'] a {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.bsky-embed-images[data-count='1'] img {
+	width: auto;
+	height: auto;
+	max-height: 32rem;
+	border: var(--rule) solid var(--ink);
+}
+
+.bsky-embed-gallery {
+	display: flex;
+	gap: var(--rule);
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+}
+
+.bsky-embed-gallery a {
+	flex: 0 0 auto;
+	scroll-snap-align: start;
+}
+
+.bsky-embed-gallery img {
+	display: block;
+	width: auto;
+	height: 16rem;
+	max-width: none;
+	border: var(--rule) solid var(--ink);
+}
+
+.bsky-embed-video {
+	position: relative;
+	display: block;
+	border: var(--rule) solid var(--ink);
+	overflow: hidden;
+	background: var(--ink);
+}
+
+.bsky-embed-video img {
+	display: block;
+	width: 100%;
+	max-height: 32rem;
+	object-fit: contain;
+}
+
+.bsky-embed-play {
+	position: absolute;
+	inset: 0;
+	margin: auto;
+	width: 3.5rem;
+	height: 3.5rem;
+	border: var(--rule) solid var(--ink);
+	border-radius: 50%;
+	background: var(--accent);
+}
+
+.bsky-embed-play::after {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 55%;
+	transform: translate(-50%, -50%);
+	border-style: solid;
+	border-width: 0.7rem 0 0.7rem 1.1rem;
+	border-color: transparent transparent transparent var(--ink);
+}
+
+.bsky-embed-external {
+	display: block;
+	border: 2px solid var(--ink);
+	overflow: hidden;
+}
+
+.bsky-embed-external img {
+	display: block;
+	width: 100%;
+	aspect-ratio: 1.91 / 1;
+	object-fit: cover;
+	border-bottom: 2px solid var(--ink);
+}
+
+.bsky-embed-external-body {
+	display: flex;
+	flex-direction: column;
+	gap: 0.125rem;
+	padding: 0.75rem;
+	line-height: 1.4rem;
+}
+
+.bsky-embed-external-title {
+	font-weight: 700;
+}
+
+.bsky-embed-external-domain {
+	color: var(--ink-dim);
+	font-family: var(--mono);
+	font-size: 0.75rem;
+}
+
+.bsky-embed-external-description {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	color: var(--ink-dim);
+	font-size: 0.9rem;
+}
+
+.bsky-embed-quote {
+	padding: 0.75rem;
+	border: 2px solid var(--ink);
+	font-size: 0.95rem;
+}
+
+.bsky-embed-quote-header {
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	min-width: 0;
+	line-height: 1.3rem;
+}
+
+.bsky-embed-quote .bsky-embed-avatar {
+	width: 20px;
+	height: 20px;
+	border-width: 1px;
+}
+
+.bsky-embed-quote .bsky-embed-text {
+	margin-top: 0.25rem;
+}
+
+.bsky-embed-notice {
+	display: block;
+	padding: 0.75rem;
+	border: 2px dashed var(--ink);
+	color: var(--ink-dim);
+	font-family: var(--mono);
+	font-size: 0.8rem;
+	line-height: 1.4rem;
+}
+
+.bsky-embed-footer {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 0.75rem;
+	font-family: var(--mono);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+}
+
+.bsky-embed-footer a {
+	color: var(--ink-dim);
+}
+
+/* Prism token colors for the black code blocks in .prose pre, above */
+pre[class*='language-'],
+code[class*='language-'] {
+	font-family: var(--mono);
+	white-space: pre;
+	word-spacing: normal;
+	word-break: normal;
+	hyphens: none;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+	color: #8a8a8a;
+	font-style: italic;
+}
+
+.token.punctuation,
+.token.operator {
+	color: #c8c8c8;
+}
+
+.token.keyword,
+.token.atrule,
+.token.important,
+.token.selector,
+.token.tag,
+.token.boolean,
+.token.deleted {
+	color: var(--accent);
+}
+
+.token.function,
+.token.class-name,
+.token.builtin,
+.token.number,
+.token.constant {
+	color: var(--highlight);
+}
+
+.token.string,
+.token.attr-value,
+.token.char,
+.token.regex,
+.token.url,
+.token.inserted {
+	color: var(--mint);
+}
+
+.token.property,
+.token.attr-name,
+.token.key,
+.token.variable {
+	color: #ff8fd0;
+}
+
+.token.namespace {
+	opacity: 0.7;
+}
+
+.token.bold,
+.token.important {
+	font-weight: 700;
+}
+
+.token.italic {
+	font-style: italic;
+}
+
+/* The sign-in dialog the upvote button and the comments open: standard.site's,
+   added to the body, so it's styled here. */
+.standard-site-dialog {
+	box-sizing: border-box;
+	width: min(26rem, calc(100vw - 2rem));
+	padding: 1.4rem;
+	border: var(--rule) solid var(--ink);
+	background: var(--bg);
+	color: var(--ink);
+	box-shadow: 8px 8px 0 var(--ink);
+}
+
+.standard-site-dialog::backdrop {
+	background: rgb(10 10 10 / 0.55);
+}
+
+.standard-site-sign-in {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.standard-site-sign-in h2 {
+	margin: 0 0 0.5rem;
+	font-family: var(--display);
+	font-weight: 400;
+	font-size: 1.4rem;
+	text-transform: uppercase;
+}
+
+.standard-site-sign-in label {
+	font-family: var(--mono);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+}
+
+.standard-site-sign-in input {
+	padding: 0.45rem 0.6rem;
+	border: var(--rule) solid var(--ink);
+	border-radius: 0;
+	background: var(--bg);
+	color: var(--ink);
+	font: inherit;
+}
+
+.standard-site-sign-in .standard-site-hint {
+	margin: 0;
+	font-size: 0.9rem;
+}
+
+.standard-site-sign-in .standard-site-error {
+	justify-self: start;
+	margin: 0;
+	padding: 0.3rem 0.5rem;
+	background: var(--ink);
+	color: var(--highlight);
+	font-weight: 700;
+}
+
+.standard-site-sign-in .standard-site-error:empty {
+	display: none;
+}
+
+.standard-site-sign-in .standard-site-actions {
+	display: flex;
+	gap: 0.6rem;
+	margin-top: 0.5rem;
+}
+
+.standard-site-sign-in button {
+	padding: 0.45rem 1.1rem;
+	border: var(--rule) solid var(--ink);
+	background: var(--bg);
+	color: var(--ink);
+	box-shadow: 4px 4px 0 var(--ink);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.standard-site-sign-in [type='submit'] {
+	background: var(--accent);
+}
+
+.standard-site-sign-in button:disabled {
+	cursor: wait;
+	opacity: 0.6;
+}

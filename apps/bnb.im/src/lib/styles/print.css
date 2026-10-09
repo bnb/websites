@@ -1,0 +1,109 @@
+/* Printed, a post is a zine page: the big name as the masthead, the post in
+   two columns, black on white. app.css imports this for print only, which
+   puts it before app.css's own rules and the components' in the cascade, so
+   every override here is !important. The selectors reach into components
+   (their classes survive scoping). */
+@page {
+	margin: 14mm 12mm;
+}
+
+body {
+	font-size: 10pt !important;
+}
+
+/* chrome a page doesn't need */
+.rail,
+.site-header .top,
+.marquee,
+.subscribe,
+.progress,
+.back,
+.direct-link,
+.site-footer {
+	display: none !important;
+}
+
+.wrap {
+	width: auto !important;
+}
+
+/* the masthead: the name at full size, ruled off */
+.site-header .name {
+	--name-size: 46pt !important;
+	--name-margin: 0 0 8pt !important;
+	padding-bottom: 6pt !important;
+	border-bottom: 4pt solid #000 !important;
+}
+
+.site-header .big-name {
+	width: auto !important;
+}
+
+.post-title {
+	margin: 10pt 0 8pt !important;
+	font-size: 26pt !important;
+}
+
+.prose {
+	max-width: none !important;
+	columns: 2 !important;
+	column-gap: 8mm !important;
+	column-rule: 1pt solid #000 !important;
+	font-size: 10pt !important;
+	line-height: 1.45 !important;
+}
+
+.prose :is(h2, h3, h4) {
+	break-after: avoid !important;
+}
+
+.prose :is(pre, figure, blockquote, img, table, li) {
+	break-inside: avoid !important;
+}
+
+.prose p {
+	orphans: 3 !important;
+	widows: 3 !important;
+}
+
+/* code in ink, not on a black slab */
+.prose pre {
+	border-width: 1.5pt !important;
+	background: none !important;
+	color: #000 !important;
+	box-shadow: none !important;
+}
+
+.prose pre,
+.prose pre code {
+	white-space: pre-wrap !important;
+	overflow-wrap: anywhere !important;
+}
+
+.prose pre .token {
+	color: inherit !important;
+}
+
+.code-file {
+	background: none !important;
+	color: #000 !important;
+	text-decoration: underline !important;
+}
+
+.prose blockquote.pull,
+.bsky-embed {
+	box-shadow: none !important;
+	rotate: none !important;
+}
+
+/* there's no hovering on paper, so outside links say where they go */
+.prose a[href^='http']:not(.bsky-embed a)::after {
+	content: ' (' attr(href) ')' !important;
+	font-family: var(--mono) !important;
+	font-size: 0.8em !important;
+	overflow-wrap: anywhere !important;
+}
+
+.colophon {
+	break-inside: avoid !important;
+}

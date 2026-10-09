@@ -1,0 +1,13 @@
+{
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"target": "es2023",
+		"module": "esnext",
+		"lib": ["es2023", "dom", "dom.iterable"],
+		"noEmit": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"types": ["@vitest/browser-playwright", "vite/client"]
+	},
+	"include": ["src", "vite.config.ts"]
+}

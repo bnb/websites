@@ -1,0 +1,29 @@
+node_modules
+
+# SvelteKit / build output
+build/
+dist/
+.svelte-kit/
+/apps/*/package
+
+# env
+.env
+.env.*
+!.env.example
+
+# tooling output
+storybook-static/
+coverage/
+playwright-report/
+test-results/
+lighthouse-report/
+.lighthouseci/
+.vitest/
+*.tsbuildinfo
+
+# build caches (Bluesky embeds)
+.cache/
+
+# misc
+vite.config.ts.timestamp-*
+.DS_Store

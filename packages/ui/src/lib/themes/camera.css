@@ -1,0 +1,39 @@
+/* tierney.camera, "Flyer": a black, loud club-flyer layout with wide heavy
+   type, mono captions and a single acid accent, tuned for low-light
+   nightlife photography. */
+[data-theme='camera'] {
+	--bg: #0b0b0b;
+	--bg-soft: #161616;
+	--line: rgba(243, 241, 236, 0.14);
+	--line-strong: rgba(243, 241, 236, 0.28);
+	--ink: #f3f1ec;
+	--ink-dim: #9c9a95;
+	--ink-faint: #7d7b77;
+	--accent: #d7ff3a;
+	--accent-ink: #0b0b0b;
+	--highlight: var(--accent);
+	--highlight-ink: var(--accent-ink);
+
+	--pad: clamp(16px, 3.4cqi, 48px);
+	--rule: 1px;
+	--ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+	--display: 'Archivo Variable', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif;
+	--body: var(--display);
+	--mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
+	--display-weight: 900;
+	--display-stretch: 125%;
+
+	/* components */
+	--name-size: clamp(48px, 15.6cqi, 228px);
+	--name-leading: 0.8;
+	--name-tracking: -0.02em;
+	--marquee-size: clamp(22px, 2.6cqi, 38px);
+	--marquee-weight: 800;
+	--marquee-stretch: 75%;
+	--marquee-pad: 14px 0;
+	--marquee-duration: 60s;
+	--signoff-size: 7.6cqi;
+
+	color-scheme: dark;
+}

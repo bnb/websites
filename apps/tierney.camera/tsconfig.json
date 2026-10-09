@@ -1,0 +1,5 @@
+{
+	"extends": ["./.svelte-kit/tsconfig.json", "../../tsconfig.base.json"]
+	// Path aliases ($lib, etc.) and includes/excludes are managed by SvelteKit
+	// in .svelte-kit/tsconfig.json, so don't duplicate them here.
+}

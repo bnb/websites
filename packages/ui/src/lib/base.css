@@ -1,0 +1,24 @@
+/* What every site shares underneath its own stylesheet: box sizing, the
+   visually-hidden utility and text-size adjustment. Each site's theme
+   (themes/*.css, selected by <html data-theme>) supplies the tokens. */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}

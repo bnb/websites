@@ -1,0 +1,58 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["import", "typescript", "unicorn", "oxc"],
+	"env": {
+		"browser": true,
+		"es2024": true,
+		"node": true
+	},
+	"categories": {
+		"correctness": "error",
+		"suspicious": "warn",
+		"perf": "warn"
+	},
+	"ignorePatterns": [
+		"**/build/",
+		"**/.svelte-kit/",
+		"**/node_modules/",
+		"**/storybook-static/",
+		"**/coverage/",
+		"**/playwright-report/",
+		"**/test-results/",
+		"**/lighthouse-report/",
+		"**/.lighthouseci/",
+		"**/.cache/",
+		"**/dist/"
+	],
+	"rules": {
+		"no-console": "off",
+		"import/no-unassigned-import": "off",
+		"unicorn/require-module-specifiers": "off",
+		"no-await-in-loop": "off"
+	},
+	"overrides": [
+		{
+			"files": ["apps/*/src/lib/**", "packages/*/src/**"],
+			"rules": {
+				"no-restricted-imports": [
+					"error",
+					{
+						"patterns": [
+							{
+								"group": ["$lib", "$lib/*"],
+								"message": "Library code imports relatively, so the styleguide can render it outside its app."
+							}
+						]
+					}
+				]
+			}
+		},
+		{
+			"files": ["**/*.test.ts"],
+			"rules": {
+				"oxc/no-map-spread": "off",
+				"unicorn/consistent-function-scoping": "off"
+			}
+		}
+	]
+}

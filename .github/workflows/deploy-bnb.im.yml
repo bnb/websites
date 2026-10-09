@@ -1,0 +1,54 @@
+# bnb.im is static: build it and publish apps/bnb.im/build to GitHub Pages.
+# In the repository's Pages settings, set the source to "GitHub Actions" and
+# the custom domain to bnb.im (static/CNAME carries it too).
+name: Deploy bnb.im
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - apps/bnb.im/**
+      - packages/**
+      - package-lock.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .tool-versions
+          cache: npm
+      - run: npm ci
+      # Bluesky embeds are cached between builds (they fall back to the cache
+      # if the AppView is unreachable)
+      - uses: actions/cache@v4
+        with:
+          path: apps/bnb.im/.cache
+          key: bnb-im-cache-${{ github.run_id }}
+          restore-keys: bnb-im-cache-
+      - run: npm run build -w apps/bnb.im
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/bnb.im/build
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

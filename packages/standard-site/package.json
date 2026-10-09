@@ -1,0 +1,39 @@
+{
+  "name": "@bnb/standard-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "standard.site for the sites: posts as site.standard.document records with leaflet rich text, synced to the PDS, and a subscribe button that signs readers in with ATProto OAuth.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./sync": "./src/sync.ts",
+    "./client/*": "./dist/client/*"
+  },
+  "scripts": {
+    "build": "node scripts/build-client.js",
+    "check": "tsc --noEmit -p .",
+    "test:unit": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "prepare": "node scripts/build-client.js"
+  },
+  "dependencies": {
+    "@bnb/atmosphere": "^0.0.0",
+    "entities": "^8.1.0"
+  },
+  "peerDependencies": {
+    "markdown-it": "^15.0.2"
+  },
+  "devDependencies": {
+    "@atproto/lexicon": "^0.7.16",
+    "@atproto/oauth-client-browser": "^0.5.9",
+    "@types/markdown-it": "^14.1.2",
+    "@vitest/browser": "^5.0.3",
+    "@vitest/browser-playwright": "^5.0.3",
+    "@vitest/coverage-v8": "^5.0.3",
+    "esbuild": "^0.28.2",
+    "fast-check": "^4.10.2",
+    "markdown-it": "^15.0.2",
+    "playwright": "^1.63.0",
+    "vitest": "^5.0.3"
+  }
+}

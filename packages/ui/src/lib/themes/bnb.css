@@ -1,0 +1,52 @@
+/* bnb.im, "Loud": thick black rules, hard offset shadows, hot pink as a fill
+   rather than a text color. Black text on pink is 5.7:1, so pink can go
+   anywhere text sits on it. Light only, by design. */
+[data-theme='bnb'] {
+	--bg: #fff;
+	--bg-soft: #fff;
+	--line: var(--ink);
+	--line-strong: var(--ink);
+	--ink: #0a0a0a;
+	--ink-dim: #555;
+	--ink-faint: #555;
+	--accent: #ff0099;
+	--accent-ink: #0a0a0a;
+	--highlight: #fff200;
+	--highlight-ink: #0a0a0a;
+	--mint: #7dffb3;
+
+	--pad: 1rem;
+	--rule: 3px;
+	--ease: ease;
+
+	--display: 'Archivo Black', 'Arial Black', Impact, sans-serif;
+	--body: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+	--mono: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+	--display-weight: 400;
+	--display-stretch: 100%;
+
+	/* components */
+	--name-size: clamp(3.2rem, 15cqi, 11.5rem);
+	--name-leading: 0.84;
+	--name-tracking: -0.035em;
+	--name-wrap: normal;
+	--marquee-border: var(--rule) solid var(--ink);
+	--marquee-size: 1.05rem;
+	--marquee-weight: 400;
+	--marquee-stretch: 100%;
+	--marquee-leading: 1.55;
+	--marquee-tracking: normal;
+	--marquee-pad: 0.55rem 0;
+	--marquee-gap: 0;
+	--marquee-duration: 45s;
+	--signoff-size: clamp(7rem, 42cqi, 28rem);
+	--signoff-leading: 0.78;
+	--signoff-tracking: -0.05em;
+	--signoff-pad: 3rem 0 1.5rem;
+	--signoff-case: none;
+	--rail-mark-bg: var(--ink);
+	--rail-mark-ink: var(--bg);
+	--rail-hover: var(--highlight);
+
+	color-scheme: light;
+}
