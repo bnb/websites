@@ -2,11 +2,12 @@
   "name": "@bnb/testing",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared test helpers: the axe accessibility check every site's end-to-end suite runs, and the Lighthouse CI budget.",
+  "description": "Shared test helpers: the axe accessibility check every site's end-to-end suite runs, the Lighthouse CI budget, and capturing evlog output.",
   "type": "module",
   "exports": {
     "./a11y": "./src/a11y.ts",
-    "./lighthouse": "./src/lighthouse.cjs"
+    "./lighthouse": "./src/lighthouse.cjs",
+    "./logs": "./src/logs.ts"
   },
   "peerDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -15,6 +16,7 @@
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
+    "evlog": "^2.30.1",
     "playwright": "^1.63.0"
   }
 }

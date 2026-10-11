@@ -2,7 +2,7 @@
   "name": "@bnb/kit",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared SvelteKit plumbing: security headers, the hash-based CSP, a stale-while-revalidate cache, request timeouts and a health check.",
+  "description": "Shared SvelteKit plumbing: security headers, the hash-based CSP, request logging with evlog, a stale-while-revalidate cache, request timeouts and a health check.",
   "type": "module",
   "exports": {
     "./server": "./src/server/index.ts",
@@ -17,8 +17,12 @@
     "@sveltejs/kit": "^2.70.3"
   },
   "devDependencies": {
+    "@bnb/testing": "^0.0.0",
     "@sveltejs/kit": "^2.70.3",
     "@vitest/coverage-v8": "^5.0.3",
     "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "evlog": "^2.30.1"
   }
 }
