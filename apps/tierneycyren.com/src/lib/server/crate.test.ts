@@ -1,3 +1,4 @@
+import { captureLogs } from '@bnb/testing/logs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const loadCrate = vi.fn();
@@ -27,7 +28,7 @@ describe('crate', () => {
 	it('logs a failed background refresh and keeps serving the last mixes', async () => {
 		vi.useFakeTimers({ toFake: ['Date'] });
 		const crate = await freshCrate();
-		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const logs = captureLogs();
 		loadCrate
 			.mockResolvedValueOnce({ bio: '', mixes: [], pds: 'https://pds.example' })
 			.mockRejectedValueOnce(new Error('PDS down'));
@@ -36,9 +37,12 @@ describe('crate', () => {
 		vi.setSystemTime(Date.now() + 10 * 60_000);
 		await expect(crate.get()).resolves.toMatchObject({ pds: 'https://pds.example' });
 		await vi.waitFor(() =>
-			expect(error).toHaveBeenCalledWith(
-				'Background refresh from the AT Protocol failed',
-				expect.any(Error)
+			expect(logs).toContainEqual(
+				expect.objectContaining({
+					level: 'error',
+					crate: { refresh: 'failed' },
+					error: expect.objectContaining({ message: 'PDS down' })
+				})
 			)
 		);
 	});

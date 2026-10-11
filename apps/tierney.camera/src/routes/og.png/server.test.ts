@@ -1,3 +1,4 @@
+import { createRequestLogger } from 'evlog';
 import sharp from 'sharp';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { thumbUrl } from '$lib/atproto';
@@ -56,7 +57,8 @@ async function freshRoute(cdn: () => Promise<Response>) {
 	vi.resetModules();
 	const { GET } = await import('./+server');
 	return async () => {
-		const response = await GET({} as Parameters<typeof GET>[0]);
+		const log = createRequestLogger();
+		const response = await GET({ locals: { log } } as Parameters<typeof GET>[0]);
 		const png = Buffer.from(await response.arrayBuffer());
 		const { width, height } = await sharp(png).metadata();
 		// the middle of the card, where the photograph goes
@@ -69,7 +71,8 @@ async function freshRoute(cdn: () => Promise<Response>) {
 			cacheControl: response.headers.get('cache-control'),
 			size: `${width}×${height}`,
 			showsPhoto: data[0] > 200 && data[1] < 60,
-			png
+			png,
+			logged: log.getContext()
 		};
 	};
 }
@@ -118,27 +121,30 @@ describe('GET /og.png', () => {
 	});
 
 	it('stands in with a card in type, cached briefly, while the AT Protocol is down', async () => {
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 		get.mockRejectedValue(new Error('PDS down'));
 		const card = await freshRoute(async () => new Response(RED));
 
 		expect(await card()).toMatchObject({
 			cacheControl: STAND_IN,
 			size: '1200×630',
-			showsPhoto: false
+			showsPhoto: false,
+			logged: { card: { fallback: 'type', unreachable: 'atproto' }, error: { message: 'PDS down' } }
 		});
 		expect(fetched()).toEqual([]);
 	});
 
 	it('stands in while the image CDN is down, and draws the real card once it is back', async () => {
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 		get.mockResolvedValue(portfolioOf([photo('one')]));
 		let up = false;
 		const card = await freshRoute(async () =>
 			up ? new Response(RED) : new Response('unavailable', { status: 503 })
 		);
 
-		expect(await card()).toMatchObject({ cacheControl: STAND_IN, showsPhoto: false });
+		expect(await card()).toMatchObject({
+			cacheControl: STAND_IN,
+			showsPhoto: false,
+			logged: { card: { fallback: 'type', unreachable: 'cdn' } }
+		});
 		up = true;
 		expect(await card()).toMatchObject({ cacheControl: FINISHED, showsPhoto: true });
 	});

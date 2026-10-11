@@ -1,3 +1,4 @@
+import { createRequestLogger } from 'evlog';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MIXES } from '$lib/fixtures';
 
@@ -6,7 +7,10 @@ vi.mock('$lib/server/crate', () => ({ crate: { get }, REQUEST_TIMEOUT_MS: 8_000 
 
 // the image CDN; satori loads its own WebAssembly with the real fetch
 const cdn = vi.fn<typeof fetch>();
-vi.mock('@bnb/kit/server', () => ({ fetchWithTimeout: () => cdn }));
+vi.mock('@bnb/kit/server', async (importOriginal) => ({
+	...(await importOriginal<typeof import('@bnb/kit/server')>()),
+	fetchWithTimeout: () => cdn
+}));
 
 /** A 1×1 PNG, standing in for the cover. */
 const PIXEL = Buffer.from(
@@ -15,7 +19,7 @@ const PIXEL = Buffer.from(
 );
 
 const { GET: handler } = await import('./+server');
-const GET = () => handler({} as never);
+const GET = (log = createRequestLogger()) => handler({ locals: { log } } as never);
 
 /** The mixes, with a newest mix of their own, so each test starts with a card the cache hasn't seen. */
 const crateWith = (name: string) => ({
@@ -30,7 +34,6 @@ describe('GET /og.png', () => {
 		cdn.mockImplementation(
 			async () => new Response(PIXEL, { headers: { 'content-type': 'image/png' } })
 		);
-		vi.spyOn(console, 'error').mockImplementation(() => {});
 	});
 	afterEach(() => {
 		get.mockReset();
@@ -64,10 +67,15 @@ describe('GET /og.png', () => {
 	it('serves a type-only card briefly when the PDS is down, and tries again next time', async () => {
 		get.mockRejectedValue(new Error('PDS down'));
 
-		const response = await GET();
+		const log = createRequestLogger();
+		const response = await GET(log);
 		expect(response.status).toBe(200);
 		expect(response.headers.get('cache-control')).toBe('public, max-age=60');
 		expect(cdn).not.toHaveBeenCalled();
+		expect(log.getContext()).toMatchObject({
+			card: { unreachable: 'atproto', complete: false, cover: false },
+			error: { message: 'PDS down' }
+		});
 
 		get.mockResolvedValue(crateWith('back'));
 		expect((await GET()).headers.get('cache-control')).toBe('public, max-age=3600, s-maxage=86400');
@@ -77,7 +85,9 @@ describe('GET /og.png', () => {
 		get.mockResolvedValue(crateWith('flaky'));
 		cdn.mockResolvedValueOnce(new Response('down', { status: 503 }));
 
-		expect((await GET()).headers.get('cache-control')).toBe('public, max-age=60');
+		const log = createRequestLogger();
+		expect((await GET(log)).headers.get('cache-control')).toBe('public, max-age=60');
+		expect(log.getContext().card).toEqual({ complete: false, cover: false });
 		expect((await GET()).headers.get('cache-control')).toBe('public, max-age=3600, s-maxage=86400');
 		expect(cdn).toHaveBeenCalledTimes(2);
 	});

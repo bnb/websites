@@ -1,3 +1,4 @@
+import { log } from 'evlog';
 import sharp from 'sharp';
 import { dominantColours } from '../palette';
 import type { Swatch } from '../types';
@@ -42,7 +43,7 @@ function pump() {
 				(palette) => palettes.set(cid, palette),
 				(error: unknown) => {
 					failedAt.set(cid, Date.now());
-					console.error(`Couldn't read the colours of ${cid}`, error);
+					log.error({ palette: { cid, read: 'failed' }, error });
 				}
 			)
 			.finally(() => {

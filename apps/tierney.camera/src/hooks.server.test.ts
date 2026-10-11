@@ -1,19 +1,35 @@
+import { captureLogs } from '@bnb/testing/logs';
 import type { RequestEvent, ResolveOptions } from '@sveltejs/kit';
 import { describe, expect, it, vi } from 'vitest';
 import { handle } from './hooks.server';
+
+const home = () =>
+	({
+		request: new Request('http://localhost/'),
+		url: new URL('http://localhost/'),
+		locals: {}
+	}) as RequestEvent;
 
 async function run() {
 	const resolve = vi.fn(
 		async (_event: RequestEvent, _options?: ResolveOptions) =>
 			new Response('<!doctype html>', { headers: { 'content-type': 'text/html' } })
 	);
-	const response = await handle({ event: {} as RequestEvent, resolve });
+	const response = await handle({ event: home(), resolve });
 	const preload = resolve.mock.calls[0][1]?.preload;
 	if (!preload) throw new Error('handle() passed no preload option to resolve()');
 	return { response, preload };
 }
 
 describe('handle (server hook)', () => {
+	it('logs each request as one wide event', async () => {
+		const logs = captureLogs({ service: 'tierney.camera' });
+		await run();
+		await vi.waitFor(() =>
+			expect(logs).toContainEqual(expect.objectContaining({ path: '/', status: 200 }))
+		);
+	});
+
 	it('adds the baseline security headers to every page', async () => {
 		const { response } = await run();
 		expect(response.headers.get('x-content-type-options')).toBe('nosniff');

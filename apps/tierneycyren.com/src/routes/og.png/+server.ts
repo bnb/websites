@@ -1,4 +1,4 @@
-import { fetchWithTimeout } from '@bnb/kit/server';
+import { asError, fetchWithTimeout } from '@bnb/kit/server';
 import { mixSummary } from '$lib/format';
 import { coverAt } from '$lib/plyr';
 import { fetchCover, renderCard } from '$lib/server/card';
@@ -20,11 +20,11 @@ const send = (png: Uint8Array<ArrayBuffer>, complete: boolean) =>
 // The share card, drawn on first request and kept in memory until the newest
 // cover or the mix count changes. If the PDS or the cover can't be reached, a
 // card without them is served briefly and redrawn on a later request.
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ locals }) => {
 	const mixes = await crate.get().then(
 		(data) => data.mixes,
 		(error: unknown) => {
-			console.error('Share card: failed to read the mixes from the AT Protocol', error);
+			locals.log.error(asError(error), { card: { unreachable: 'atproto' } });
 			return null;
 		}
 	);
@@ -38,6 +38,7 @@ export const GET: RequestHandler = async () => {
 		: null;
 	const png = await renderCard({ cover, summary });
 	const complete = !!mixes && (!newest || !!cover);
+	locals.log.set({ card: { complete, cover: !!cover } });
 	if (complete) cached = { key, png };
 	return send(png, complete);
 };

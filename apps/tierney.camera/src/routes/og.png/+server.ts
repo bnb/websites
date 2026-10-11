@@ -1,3 +1,4 @@
+import { asError } from '@bnb/kit/server';
 import type { RequestHandler } from './$types';
 import { exposure, personName, shortPlace, stampDate } from '$lib/format';
 import { pickFeatured } from '$lib/layout';
@@ -19,9 +20,9 @@ let finished: { key: string; png: Uint8Array<ArrayBuffer> } | undefined;
 const png = (body: Uint8Array<ArrayBuffer>, cacheControl: string) =>
 	new Response(body, { headers: { 'content-type': 'image/png', 'cache-control': cacheControl } });
 
-export const GET: RequestHandler = async () => {
+export const GET: RequestHandler = async ({ locals }) => {
 	const data = await portfolio.get().catch((error: unknown) => {
-		console.error('The share card fell back to type: the AT Protocol is unreachable', error);
+		locals.log.error(asError(error), { card: { fallback: 'type', unreachable: 'atproto' } });
 		return null;
 	});
 	const name = personName(data?.profile ?? null);
@@ -38,7 +39,7 @@ export const GET: RequestHandler = async () => {
 	if (finished?.key === key) return png(finished.png, FINISHED);
 
 	const jpeg = await thumbnail(featured.cid).catch((error: unknown) => {
-		console.error('The share card fell back to type: the image CDN is unreachable', error);
+		locals.log.error(asError(error), { card: { fallback: 'type', unreachable: 'cdn' } });
 		return null;
 	});
 	if (!jpeg) return png(await renderCard({ name, photo: null, caption: [] }), STAND_IN);

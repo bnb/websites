@@ -1,3 +1,4 @@
+import { captureLogs } from '@bnb/testing/logs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Portfolio } from '../types';
 
@@ -39,7 +40,7 @@ describe('portfolio (server cache)', () => {
 	});
 
 	it('refreshes in the background after five minutes, keeping the last good copy through a failure', async () => {
-		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const logs = captureLogs();
 		const portfolio = await freshPortfolio();
 		loadPortfolio.mockResolvedValueOnce(portfolioOf('https://pds.one'));
 		await portfolio.get();
@@ -50,7 +51,13 @@ describe('portfolio (server cache)', () => {
 		loadPortfolio.mockRejectedValueOnce(outage);
 		await expect(portfolio.get()).resolves.toEqual(portfolioOf('https://pds.one'));
 		await vi.waitFor(() =>
-			expect(error).toHaveBeenCalledWith('Background refresh from the AT Protocol failed', outage)
+			expect(logs).toContainEqual(
+				expect.objectContaining({
+					level: 'error',
+					portfolio: { refresh: 'failed' },
+					error: expect.objectContaining({ message: outage.message })
+				})
+			)
 		);
 
 		// the next refresh succeeds, and later reads get the new copy

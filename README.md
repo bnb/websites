@@ -25,11 +25,12 @@ packages/
   atproto/           @bnb/atproto: PDS resolution, paginated record reads, CDN and blob URLs, AT Tags
   atmosphere/        @bnb/atmosphere: the readers' browser client (OAuth sign-in, writes to their repo,
                      Constellation and Slingshot reads)
-  kit/               @bnb/kit: security headers, the hash-based CSP, a stale-while-revalidate cache,
-                     request timeouts and a health check
+  kit/               @bnb/kit: security headers, the hash-based CSP, request logging with evlog, a
+                     stale-while-revalidate cache, request timeouts and a health check
   standard-site/     @bnb/standard-site: standard.site without a site generator: Markdown → leaflet
                      records, syncing them to the PDS, and the subscribe, upvote and comments elements
-  testing/           @bnb/testing: the axe check every end-to-end suite runs, the Lighthouse budget
+  testing/           @bnb/testing: the axe check every end-to-end suite runs, the Lighthouse budget,
+                     capturing evlog output in unit tests
 docs/features/       what each site does
 ```
 
@@ -90,6 +91,14 @@ build, so its rail is as fresh as its last deploy.
 
 Node 22 or newer (`.tool-versions` pins 24).
 
+### Logs
+
+tierney.camera and tierneycyren.com log with [evlog](https://www.evlog.dev/): one wide event per request
+(method, path, status, duration, and what the page added, like the photo or mix count), plus one for each
+background refresh or palette read that fails. `vite dev` prints them readably and also appends them as
+NDJSON to `.evlog/logs/` in the app's folder; production prints one JSON line each for the host to collect.
+`/healthz` isn't logged. bnb.im is static, so it has no request logs.
+
 ## Scripts
 
 Run from the root; each runs across every workspace that has it.
@@ -131,6 +140,7 @@ Or in one workspace: `npm run test:e2e -w apps/bnb.im`.
 - [Storybook](https://storybook.js.org/) as the styleguide, every story an axe test
 - [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci), run through `npx`
 - [Fontsource](https://fontsource.org/) for self-hosted fonts on every site
+- [evlog](https://www.evlog.dev/) for structured request logs on the Node sites
 
 `.github/workflows/ci.yml` runs all of it on pushes and pull requests;
 `.github/workflows/deploy-bnb.im.yml` publishes bnb.im to GitHub Pages.

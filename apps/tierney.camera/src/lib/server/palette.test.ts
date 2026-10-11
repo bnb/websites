@@ -1,3 +1,4 @@
+import { captureLogs } from '@bnb/testing/logs';
 import sharp from 'sharp';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { thumbUrl } from '../atproto';
@@ -80,15 +81,16 @@ describe('palettesFor', () => {
 	});
 
 	it('leaves a photograph without colours when its thumbnail fails, and tries again ten minutes on', async () => {
-		const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+		const logs = captureLogs();
 		let status = 502;
 		const palettesFor = await freshPalettes(async () =>
 			status === 200 ? new Response(frame) : new Response('busy', { status })
 		);
 
 		palettesFor(['cid-a']);
-		await vi.waitFor(() => expect(error).toHaveBeenCalledOnce());
-		expect(String(error.mock.calls[0][1])).toContain('502');
+		await vi.waitFor(() => expect(logs).toHaveLength(1));
+		expect(logs[0]).toMatchObject({ level: 'error', palette: { cid: 'cid-a', read: 'failed' } });
+		expect(JSON.stringify(logs[0].error)).toContain('502');
 
 		status = 200;
 		vi.setSystemTime(Date.now() + 9 * MINUTE);

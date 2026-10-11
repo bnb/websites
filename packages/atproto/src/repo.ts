@@ -1,3 +1,4 @@
+import { log } from 'evlog';
 import { DEFAULT_PDS, DID } from './account';
 import type { AtpRecord } from './types';
 
@@ -66,9 +67,7 @@ export async function listRecords<T>(
 		cursor = data.cursor;
 	}
 
-	console.warn(
-		`listRecords ${collection}: stopped at ${out.length} records (MAX_PAGES); the rest are skipped`
-	);
+	log.warn({ atproto: { listRecords: { collection, records: out.length, truncated: true } } });
 	return out;
 }
 

@@ -1,3 +1,4 @@
+import { createRequestLogger } from 'evlog';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const get = vi.fn();
@@ -11,8 +12,13 @@ type LoadEvent = Parameters<typeof load>[0];
 
 async function run() {
 	const setHeaders = vi.fn();
-	const data = await load({ setHeaders } as unknown as LoadEvent);
-	return { data, headers: setHeaders.mock.calls[0][0] as Record<string, string> };
+	const log = createRequestLogger();
+	const data = await load({ locals: { log }, setHeaders } as unknown as LoadEvent);
+	return {
+		data,
+		headers: setHeaders.mock.calls[0][0] as Record<string, string>,
+		logged: log.getContext()
+	};
 }
 
 describe('page load', () => {
@@ -34,15 +40,16 @@ describe('page load', () => {
 			photos: [{ cid: 'cid-a' }, { cid: 'cid-b' }],
 			pds: 'https://pds.example'
 		});
-		const { data } = await run();
+		const { data, logged } = await run();
 		expect(data).toHaveProperty('palettes', { 'cid-a': swatches });
+		expect(logged.portfolio).toEqual({ photos: 2, palettesReady: 1 });
 	});
 
 	it('keeps the outage page out of caches and search indexes', async () => {
 		get.mockRejectedValue(new Error('PDS down'));
-		vi.spyOn(console, 'error').mockImplementation(() => {});
-		const { data, headers } = await run();
+		const { data, headers, logged } = await run();
 		expect(data).toMatchObject({ loadError: true, photos: [], palettes: {} });
 		expect(headers).toEqual({ 'cache-control': 'no-store', 'x-robots-tag': 'noindex' });
+		expect(logged).toMatchObject({ portfolio: { outage: true }, error: { message: 'PDS down' } });
 	});
 });

@@ -1,3 +1,4 @@
+import { captureLogs } from '@bnb/testing/logs';
 import { describe, expect, it, vi } from 'vitest';
 import {
 	DEFAULT_PDS,
@@ -81,13 +82,23 @@ describe('listRecords', () => {
 			cursor: 'more'
 		};
 		const fetchFn = vi.fn(async () => jsonResponse(full));
-		const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+		const logs = captureLogs();
 
 		const out = await listRecords(asFetch(fetchFn), DEFAULT_PDS, 'social.grain.photo');
 		expect(fetchFn).toHaveBeenCalledTimes(MAX_PAGES);
 		expect(out).toHaveLength(MAX_PAGES * 100);
-		expect(warn).toHaveBeenCalledOnce();
-		warn.mockRestore();
+		expect(logs).toEqual([
+			expect.objectContaining({
+				level: 'warn',
+				atproto: {
+					listRecords: {
+						collection: 'social.grain.photo',
+						records: MAX_PAGES * 100,
+						truncated: true
+					}
+				}
+			})
+		]);
 	});
 
 	it('throws on a non-ok response', async () => {
