@@ -11,6 +11,9 @@ describe('Marquee (component)', () => {
 	it('pauses from the keyboard via its focus-revealed checkbox', async () => {
 		const { container } = await render(Marquee, { items: ['Bushwick', 'Sony α7R IV'] });
 		const toggle = page.getByRole('checkbox', { name: 'Pause the ticker' });
+		// The pointer starts in the frame's top-left corner, over the band, which Chromium on Linux
+		// counts as hovering it: that pauses it too. Moved off so only the checkbox decides.
+		await userEvent.unhover(container.querySelector('.marquee')!);
 
 		await userEvent.tab();
 		await expect.element(toggle).toHaveFocus();
