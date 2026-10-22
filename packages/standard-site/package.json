@@ -27,7 +27,7 @@
     "@atproto/lexicon": "^0.7.16",
     "@atproto/oauth-client-browser": "^0.5.9",
     "@types/markdown-it": "^14.1.2",
-    "@vitest/browser": "^5.0.3",
+    "@vitest/browser": "^5.0.5",
     "@vitest/browser-playwright": "^5.0.3",
     "@vitest/coverage-v8": "^5.0.3",
     "esbuild": "^0.28.2",
