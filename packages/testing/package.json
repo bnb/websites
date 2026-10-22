@@ -7,7 +7,8 @@
   "exports": {
     "./a11y": "./src/a11y.ts",
     "./lighthouse": "./src/lighthouse.cjs",
-    "./logs": "./src/logs.ts"
+    "./logs": "./src/logs.ts",
+    "./playwright": "./src/playwright.ts"
   },
   "peerDependencies": {
     "@axe-core/playwright": "^4.13.0",
