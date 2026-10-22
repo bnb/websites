@@ -1,0 +1,51 @@
+name: Dependency review
+
+# The dependencies a pull request adds or updates, in package-lock.json and the workflows, from
+# GitHub's dependency graph: advisories and licences. npm-advisories.yml covers advisories in what's
+# already installed. The job runs on every pull request: the API says whether any dependency
+# changed, and it's done in seconds when none did, so it reports without a changes filter or a
+# passed job.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # The summary comment, posted only when the review fails. Pull requests from forks get a
+      # read-only token, and the action logs a warning in place of the comment.
+      pull-requests: write
+    steps:
+      # Reads the base and head commits through the API: nothing to check out.
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Like `npm audit --omit=dev` in npm-advisories.yml: an advisory of any severity fails, in
+          # what the sites run (the runtime scope) and not the dev tooling.
+          fail-on-severity: low
+          fail-on-scopes: runtime
+          # OFL-1.1 is the fonts' (@fontsource), and LGPL-3.0-or-later is libvips, which sharp loads
+          # as a separate library for tierney.camera's photo colours.
+          allow-licenses: >-
+            0BSD,
+            Apache-2.0,
+            BSD-2-Clause,
+            BSD-3-Clause,
+            CC0-1.0,
+            ISC,
+            MIT,
+            MIT-0,
+            MPL-2.0,
+            Unlicense,
+            OFL-1.1,
+            LGPL-3.0-or-later
+          comment-summary-in-pr: on-failure

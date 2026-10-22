@@ -89,7 +89,7 @@ port, change it in `SiteRail.svelte` too. Each site's layout reads the rail's ne
 (`loadLatest` in `@bnb/atproto`): tierney.camera and tierneycyren.com every five minutes, bnb.im once a
 build, so its rail is as fresh as its last deploy.
 
-Node 22 or newer (`.tool-versions` pins 24).
+Node 22 or newer (`.node-version` pins 24, which fnm reads).
 
 ### Logs
 
@@ -142,5 +142,19 @@ Or in one workspace: `npm run test:e2e -w apps/bnb.im`.
 - [Fontsource](https://fontsource.org/) for self-hosted fonts on every site
 - [evlog](https://www.evlog.dev/) for structured request logs on the Node sites
 
-`.github/workflows/ci.yml` runs all of it on pushes and pull requests;
-`.github/workflows/deploy-bnb.im.yml` publishes bnb.im to GitHub Pages.
+## CI
+
+GitHub Actions, in `.github/workflows`, with every action pinned to a commit and kept current by
+Dependabot:
+
+- `ci.yml`, on pushes to main and pull requests: lint, format, knip and types; every workspace's
+  coverage, with a comment comparing it to main's; Storybook's axe tests and build; and, for each site
+  a change reaches, its end-to-end tests in Chromium and Lighthouse. Drafts wait until they're ready
+  for review. `CI passed` is the one check to require. On main it then deploys bnb.im to GitHub Pages
+  (`deploy-bnb.im.yml`) once the `BNB_IM_PAGES` repository variable is `true`.
+- `scheduled.yml`, weekly: every site's end-to-end tests in Chromium, Firefox and WebKit, and
+  Lighthouse, which also catches the live AT Protocol data breaking a page. A failed run opens an
+  issue, and the next run that passes closes it.
+- `npm-advisories.yml` (`npm audit --omit=dev`, on lockfile changes and weekly) and
+  `dependency-review.yml` (advisories and licences of the dependencies a pull request adds).
+- `workflow-lint.yml`: actionlint and zizmor on the workflows themselves.

@@ -3,54 +3,336 @@ name: CI
 on:
   push:
     branches: [main]
+  # The default types, and ready_for_review for a draft's first run (see the changes job).
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
 
+# A newer push to a pull request cancels its older run. Runs on main queue instead, so a bnb.im
+# deploy (the deploy-bnb job) is never cut off halfway.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# Actions are pinned to commits, kept current by Dependabot (.github/dependabot.yml). Pull requests
+# run the end-to-end tests in Chromium; Firefox and WebKit run weekly in scheduled.yml.
 jobs:
-  check:
-    name: Lint, types, unit tests and coverage
+  # Pushes and pull requests always start this workflow, so the passed job at the end always
+  # reports. The other jobs run only when what they check changed. A draft skips the work until
+  # it's marked ready for review.
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+    # The API lists at most 3000 of a pull request's files, so one that size runs everything.
+    # e2e and lighthouse are the sites to run them for, as JSON lists for the matrices.
+    outputs:
+      run: ${{ !github.event.pull_request.draft }}
+      code: ${{ !github.event.pull_request.draft && (github.event.pull_request.changed_files >= 3000 || steps.filter.outputs.code == 'true') }}
+      e2e: ${{ github.event.pull_request.draft && '[]' || (github.event.pull_request.changed_files >= 3000 && '["bnb.im","tierney.camera","tierneycyren.com"]' || steps.e2e.outputs.changes) }}
+      lighthouse: ${{ github.event.pull_request.draft && '[]' || (github.event.pull_request.changed_files >= 3000 && '["bnb.im","tierney.camera","tierneycyren.com"]' || steps.lighthouse.outputs.changes) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # A pull request's files come from the API. A push is diffed against the last commit this
+      # workflow passed on, so what a cancelled or failed run didn't check runs on the next push.
+      - if: github.event_name == 'push'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .tool-versions
+          persist-credentials: false
+      - if: github.event_name == 'push'
+        id: base
+        uses: ./.github/actions/last-passed
+      # Everything but the docs: unit tests, coverage and stories.
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          base: ${{ steps.base.outputs.sha }}
+          predicate-quantifier: some-with-excludes
+          filters: |
+            code:
+              - '**'
+              - '!README.md'
+              - '!*/*/README.md'
+              - '!docs/**'
+              - '!LICENSE'
+              - '!CODE_OF_CONDUCT.md'
+      # Each site with the workspace packages it imports (see its package.json; @bnb/standard-site
+      # imports @bnb/atmosphere) and the install and CI config around them.
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: e2e
+        with:
+          base: ${{ steps.base.outputs.sha }}
+          filters: |
+            bnb.im: &bnb
+              - &root ['package.json', 'package-lock.json', '.npmrc', '.node-version', 'tsconfig.base.json', '.github/workflows/ci.yml']
+              - 'apps/bnb.im/**'
+              - 'packages/**'
+            tierney.camera: &camera
+              - *root
+              - 'apps/tierney.camera/**'
+              - 'packages/atmosphere/**'
+              - 'packages/atproto/**'
+              - 'packages/kit/**'
+              - 'packages/testing/**'
+              - 'packages/ui/**'
+            tierneycyren.com: &dj
+              - *root
+              - 'apps/tierneycyren.com/**'
+              - 'packages/atproto/**'
+              - 'packages/kit/**'
+              - 'packages/testing/**'
+              - 'packages/ui/**'
+      # The same, without the tests, stories and docs, which don't change the pages Lighthouse
+      # measures. packages/testing stays: it has the Lighthouse config (src/lighthouse.cjs).
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: lighthouse
+        with:
+          base: ${{ steps.base.outputs.sha }}
+          predicate-quantifier: some-with-excludes
+          filters: |
+            bnb.im:
+              - *bnb
+              - &pages ['!**/*.test.ts', '!**/*.spec.ts', '!**/e2e/**', '!**/*.stories.svelte', '!**/*.mdx', '!**/README.md']
+            tierney.camera: [*camera, *pages]
+            tierneycyren.com: [*dj, *pages]
+
+  verify:
+    name: Lint, format, knip, types
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
           cache: npm
       - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - run: npm run lint:all
       - run: npm run format:check
       - run: npm run knip
       - run: npm run check
-      - run: npm run test:coverage
-      - run: npm run test:storybook
 
-  e2e:
-    name: End-to-end (${{ matrix.app }})
+  # Every workspace's unit and browser tests, failing below its thresholds (its Vitest config).
+  # The JSON summaries are for the report job; main's runs keep theirs for pull requests to compare
+  # with.
+  coverage:
+    name: Unit tests and coverage
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        app: [bnb.im, tierney.camera, tierneycyren.com]
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .tool-versions
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e -w apps/${{ matrix.app }}
+      - run: npm run test:coverage --workspaces --if-present -- --coverage.reporter=text --coverage.reporter=json-summary
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: coverage
+          path: |
+            apps/*/coverage/coverage-summary.json
+            packages/*/coverage/coverage-summary.json
+
+  # Every story rendered in Chromium and checked with axe, then the static Storybook build.
+  storybook:
+    name: Storybook
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:storybook
+      - run: npm run build-storybook
+
+  # Each changed site's production build, with axe on every page its tests visit (e2e/a11y.test.ts).
+  e2e:
+    name: End-to-end (${{ matrix.app }}, Chromium)
+    needs: changes
+    if: needs.changes.outputs.e2e != '[]' && needs.changes.outputs.e2e != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.e2e) }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # bnb.im's build fetches each embedded Bluesky post once a day (.cache/bluesky); this keeps
+      # that cache between runs instead of asking the AppView again every build.
+      - if: matrix.app == 'bnb.im'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: apps/bnb.im/.cache
+          key: bnb-im-cache-${{ github.run_id }}-${{ github.job }}
+          restore-keys: bnb-im-cache-
+      - run: npm run test:e2e -w "apps/$APP" -- --project chromium
         env:
-          CI: true
-      - uses: actions/upload-artifact@v4
+          APP: ${{ matrix.app }}
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: playwright-report-${{ matrix.app }}
-          path: apps/${{ matrix.app }}/playwright-report
+          path: apps/${{ matrix.app }}/playwright-report/
+
+  # Lighthouse on each changed site's production build, against the floors in
+  # packages/testing/src/lighthouse.cjs (accessibility and SEO must be 100). The scores and any
+  # failed assertion go to the run's summary and the reports to its artifacts.
+  lighthouse:
+    name: Lighthouse (${{ matrix.app }})
+    needs: changes
+    if: needs.changes.outputs.lighthouse != '[]' && needs.changes.outputs.lighthouse != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.lighthouse) }}
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.app }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Lighthouse starts Playwright's Chromium itself, with its sandbox. Ubuntu's AppArmor policy
+      # keeps programs without a profile of their own from creating the user namespaces the sandbox
+      # runs in. Lifted here rather than running Chromium without its sandbox.
+      - run: sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0
+      - if: matrix.app == 'bnb.im'
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: apps/bnb.im/.cache
+          key: bnb-im-cache-${{ github.run_id }}-${{ github.job }}
+          restore-keys: bnb-im-cache-
+      - run: npm run lighthouse
+      # Each page's scores from the run lhci reports as representative (its median), then each
+      # assertion that failed: lhci writes both even when one does.
+      - name: Scores to the run's summary
+        if: ${{ !cancelled() && hashFiles(format('apps/{0}/lighthouse-report/manifest.json', matrix.app)) != '' }}
+        env:
+          APP: ${{ matrix.app }}
+        run: |
+          {
+            echo "## Lighthouse: $APP"
+            echo
+            echo "| Page | Performance | Accessibility | Best practices | SEO |"
+            echo "| --- | ---: | ---: | ---: | ---: |"
+            jq -r '.[] | select(.isRepresentativeRun) | .summary as $s
+              | "| \(.url | sub("^https?://[^/]+"; "")) | \([$s.performance, $s.accessibility, $s["best-practices"], $s.seo]
+                | map(. * 100 | round) | join(" | ")) |"' lighthouse-report/manifest.json
+            # An empty list when every assertion passed.
+            if jq -e 'length > 0' .lighthouseci/assertion-results.json > /dev/null 2>&1; then
+              echo
+              echo "Failed:"
+              echo
+              jq -r '.[] | "- \(.url | sub("^https?://[^/]+"; "")): \(.auditId)\(.auditProperty // "" | if . != "" then ".\(.)" else "" end)"
+                + " was \(.actual * 100 | round / 100), expected \(.operator) \(.expected)"' .lighthouseci/assertion-results.json
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-report-${{ matrix.app }}
+          path: apps/${{ matrix.app }}/lighthouse-report/
+
+  # Coverage on the pull request against main's latest, in one comment each push updates, and in
+  # the run's summary, which is all a fork's pull request gets: its token can't comment. Not one of
+  # passed's needs, so a comment that can't post never holds up a merge.
+  report:
+    name: Coverage report
+    needs: [changes, coverage]
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.changes.outputs.code == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      # main's coverage, from its runs' artifacts.
+      actions: read
+      pull-requests: write
+    steps:
+      # For the local actions.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: download
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: coverage
+          path: ${{ runner.temp }}/coverage
+      - id: coverage
+        if: steps.download.outcome == 'success'
+        uses: ./.github/actions/coverage-report
+        with:
+          coverage: ${{ runner.temp }}/coverage
+          output: ${{ runner.temp }}/coverage.md
+      - if: steps.coverage.outcome == 'success'
+        uses: ./.github/actions/pr-comment
+        with:
+          marker: <!-- ci-report -->
+          section: coverage
+          body-path: ${{ runner.temp }}/coverage.md
+
+  # The check to require on main: it fails if any job above failed or was cancelled, and passes
+  # when they all passed or were skipped because nothing they check changed.
+  passed:
+    name: CI passed
+    if: always()
+    needs: [changes, verify, coverage, storybook, e2e, lighthouse]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+
+  # bnb.im to GitHub Pages, from main, once everything above passed and only when bnb.im changed.
+  # Off until the repository variable BNB_IM_PAGES is "true" (see deploy-bnb.im.yml).
+  deploy-bnb:
+    name: Deploy bnb.im
+    needs: [changes, passed]
+    if: >-
+      github.event_name == 'push' && vars.BNB_IM_PAGES == 'true'
+      && contains(fromJSON(needs.changes.outputs.e2e), 'bnb.im')
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy-bnb.im.yml
