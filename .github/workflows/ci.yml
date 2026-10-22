@@ -34,8 +34,8 @@ jobs:
     outputs:
       run: ${{ !github.event.pull_request.draft }}
       code: ${{ !github.event.pull_request.draft && (github.event.pull_request.changed_files >= 3000 || steps.filter.outputs.code == 'true') }}
-      e2e: ${{ github.event.pull_request.draft && '[]' || (github.event.pull_request.changed_files >= 3000 && '["bnb.im","tierney.camera","tierneycyren.com"]' || steps.e2e.outputs.changes) }}
-      lighthouse: ${{ github.event.pull_request.draft && '[]' || (github.event.pull_request.changed_files >= 3000 && '["bnb.im","tierney.camera","tierneycyren.com"]' || steps.lighthouse.outputs.changes) }}
+      e2e: ${{ github.event.pull_request.draft && '[]' || (github.event.pull_request.changed_files >= 3000 && '["bnb.im","tierney.camera","tierneycyren.com"]' || steps.sites.outputs.e2e) }}
+      lighthouse: ${{ github.event.pull_request.draft && '[]' || (github.event.pull_request.changed_files >= 3000 && '["bnb.im","tierney.camera","tierneycyren.com"]' || steps.sites.outputs.lighthouse) }}
     steps:
       # A pull request's files come from the API. A push is diffed against the last commit this
       # workflow passed on, so what a cancelled or failed run didn't check runs on the next push.
@@ -46,7 +46,12 @@ jobs:
       - if: github.event_name == 'push'
         id: base
         uses: ./.github/actions/last-passed
-      # Everything but the docs: unit tests, coverage and stories.
+      # One step, so the lists can share YAML anchors: they don't reach another step's filters.
+      #   code: everything but the docs, for the unit tests, coverage and stories.
+      #   e2e/<site>: each site with the workspace packages it imports (see its package.json;
+      #     @bnb/standard-site imports @bnb/atmosphere) and the install and CI config around them.
+      #   lighthouse/<site>: the same without the tests, stories and docs, which don't change the
+      #     pages Lighthouse measures. packages/testing stays: it has the Lighthouse config.
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
@@ -60,18 +65,11 @@ jobs:
               - '!docs/**'
               - '!LICENSE'
               - '!CODE_OF_CONDUCT.md'
-      # Each site with the workspace packages it imports (see its package.json; @bnb/standard-site
-      # imports @bnb/atmosphere) and the install and CI config around them.
-      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        id: e2e
-        with:
-          base: ${{ steps.base.outputs.sha }}
-          filters: |
-            bnb.im: &bnb
+            e2e/bnb.im: &bnb
               - &root ['package.json', 'package-lock.json', '.npmrc', '.node-version', 'tsconfig.base.json', '.github/workflows/ci.yml']
               - 'apps/bnb.im/**'
               - 'packages/**'
-            tierney.camera: &camera
+            e2e/tierney.camera: &camera
               - *root
               - 'apps/tierney.camera/**'
               - 'packages/atmosphere/**'
@@ -79,26 +77,26 @@ jobs:
               - 'packages/kit/**'
               - 'packages/testing/**'
               - 'packages/ui/**'
-            tierneycyren.com: &dj
+            e2e/tierneycyren.com: &dj
               - *root
               - 'apps/tierneycyren.com/**'
               - 'packages/atproto/**'
               - 'packages/kit/**'
               - 'packages/testing/**'
               - 'packages/ui/**'
-      # The same, without the tests, stories and docs, which don't change the pages Lighthouse
-      # measures. packages/testing stays: it has the Lighthouse config (src/lighthouse.cjs).
-      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        id: lighthouse
-        with:
-          base: ${{ steps.base.outputs.sha }}
-          predicate-quantifier: some-with-excludes
-          filters: |
-            bnb.im:
+            lighthouse/bnb.im:
               - *bnb
               - &pages ['!**/*.test.ts', '!**/*.spec.ts', '!**/e2e/**', '!**/*.stories.svelte', '!**/*.mdx', '!**/README.md']
-            tierney.camera: [*camera, *pages]
-            tierneycyren.com: [*dj, *pages]
+            lighthouse/tierney.camera: [*camera, *pages]
+            lighthouse/tierneycyren.com: [*dj, *pages]
+      # The filters that matched, split into each matrix's sites.
+      - id: sites
+        env:
+          CHANGES: ${{ steps.filter.outputs.changes }}
+        run: |
+          for job in e2e lighthouse; do
+            echo "$job=$(jq -c --arg job "$job/" '[.[] | select(startswith($job)) | ltrimstr($job)]' <<< "${CHANGES:-[]}")" >> "$GITHUB_OUTPUT"
+          done
 
   verify:
     name: Lint, format, knip, types
