@@ -20,7 +20,7 @@
     "@fontsource/space-grotesk": "^5.2.0",
     "@storybook/addon-a11y": "^10.6.1",
     "@storybook/addon-svelte-csf": "^5.1.5",
-    "@storybook/addon-vitest": "^10.6.1",
+    "@storybook/addon-vitest": "^10.6.2",
     "@storybook/sveltekit": "^10.6.1",
     "@sveltejs/kit": "^2.70.3",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
