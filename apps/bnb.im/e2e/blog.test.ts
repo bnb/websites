@@ -94,6 +94,11 @@ test.describe('bnb.im', () => {
 	}) => {
 		await page.goto('/posts/what-is-the-atmosphere/');
 		const bar = page.locator('.progress');
+		// without scroll-driven animations (Firefox) nothing would fill it, so it isn't shown
+		if (!(await page.evaluate(() => CSS.supports('animation-timeline: scroll()')))) {
+			await expect(bar).toBeHidden();
+			return;
+		}
 		const scale = () => bar.evaluate((el) => new DOMMatrix(getComputedStyle(el).transform).a);
 		expect(await scale()).toBeLessThan(0.05);
 		await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
@@ -126,6 +131,8 @@ test.describe('bnb.im', () => {
 		const marquee = page.locator('label.marquee');
 		await expect(name).toHaveCSS('view-transition-name', 'big-name');
 		await expect(marquee).toHaveCSS('view-transition-name', 'marquee');
+		// sitting out needs view timelines (not in Firefox), so there they always morph
+		if (!(await page.evaluate(() => CSS.supports('animation-timeline: view()')))) return;
 		// scrolled off the top, they'd fly in from nowhere, so they sit it out
 		await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
 		await expect(name).toHaveCSS('view-transition-name', 'none');

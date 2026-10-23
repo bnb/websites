@@ -1,8 +1,10 @@
 import { defineConfig } from '@playwright/test';
+import { projects } from '@bnb/testing/playwright';
 
 export default defineConfig({
 	testDir: 'e2e',
 	fullyParallel: true,
+	projects,
 	use: {
 		baseURL: 'http://localhost:4175'
 	},

@@ -1,0 +1,35 @@
+# A pull request a month for each ecosystem, every update in one, leaving out releases less than
+# a week old so a compromised release has time to be caught and pulled first.
+#
+# The workflows pin actions to commits; this keeps the pins current. npm: the lockfile only, the
+# semver-compatible updates `npm update` would make. package.json is changed by hand.
+#
+# Security updates don't wait for the month or the cooldown: they come as soon as an advisory is
+# published, grouped into one pull request per ecosystem by the `*-security` groups.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directories: ['/', '/.github/actions/*']
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
+      actions-security:
+        applies-to: security-updates
+        patterns: ['*']
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    versioning-strategy: lockfile-only
+    groups:
+      npm:
+        patterns: ['*']
+      npm-security:
+        applies-to: security-updates
+        patterns: ['*']
