@@ -197,8 +197,12 @@ export async function renderCard(
 		height: HEIGHT,
 		fonts: loadFonts()
 	});
+	// satori draws the text as paths, so resvg needs no fonts; loading the system ones took
+	// most of each render
 	return new Uint8Array(
-		new Resvg(svg, { fitTo: { mode: 'width', value: WIDTH } }).render().asPng()
+		new Resvg(svg, { fitTo: { mode: 'width', value: WIDTH }, font: { loadSystemFonts: false } })
+			.render()
+			.asPng()
 	);
 }
 
