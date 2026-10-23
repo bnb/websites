@@ -1,0 +1,54 @@
+name: Coverage report
+description: >-
+  A table of each workspace's coverage (the coverage-summary.json files in this run's `coverage`
+  artifact) beside the same from main's latest push run that has one, written to the run's summary
+  and to `output` for the pull request comment. The thresholds that fail a run are in each
+  workspace's Vitest config; this only reports. Needs `actions: read`.
+
+inputs:
+  coverage:
+    description: The directory this run's coverage artifact was downloaded into.
+    required: true
+  output:
+    description: Where to write the Markdown.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - id: main
+      uses: ./.github/actions/main-artifact
+      with:
+        name: coverage
+        path: ${{ runner.temp }}/main-coverage
+    - shell: bash
+      env:
+        NOW: ${{ inputs.coverage }}
+        MAIN: ${{ steps.main.outputs.found == 'true' && format('{0}/main-coverage', runner.temp) || '' }}
+        MAIN_URL: ${{ steps.main.outputs.run-url }}
+        OUTPUT: ${{ inputs.output }}
+      run: |
+        # One object per run: {"apps/bnb.im": {lines, statements, functions, branches}, ...}, keyed
+        # by the workspace each coverage/coverage-summary.json sits in.
+        totals() {
+          [ -n "$1" ] || { echo '{}'; return; }
+          (cd "$1" && find . -path '*/coverage/coverage-summary.json' | sort | while read -r file; do
+            jq --arg ws "$(dirname "$(dirname "${file#./}")")" \
+              '{($ws): (.total | map_values(.pct))}' "$file"
+          done) | jq -s 'add // {}'
+        }
+        jq -rn --argjson now "$(totals "$NOW")" --argjson main "$(totals "$MAIN")" --arg url "$MAIN_URL" '
+          def pct: "\(.)%";
+          def cell($was): if $was == null then pct
+            else (. - $was | . * 100 | round / 100) as $d
+              | pct + if $d > 0 then " (+\($d))" elif $d < 0 then " (\($d))" else "" end end;
+          "### Coverage",
+          "",
+          "\(if $main == {} then "Nothing from main to compare with yet" else "Changes compared with [main](\($url))" end).",
+          "",
+          "| Workspace | Lines | Statements | Functions | Branches |",
+          "| --- | ---: | ---: | ---: | ---: |",
+          ($now | to_entries[] | .key as $ws | .value as $t | $main[$ws] as $m
+            | "| \($ws) | " + ([ "lines", "statements", "functions", "branches" ]
+              | map(. as $k | $t[$k] | cell($m[$k]?)) | join(" | ")) + " |")
+        ' | tee "$OUTPUT" >> "$GITHUB_STEP_SUMMARY"

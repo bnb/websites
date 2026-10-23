@@ -1,21 +1,15 @@
-# bnb.im is static: build it and publish apps/bnb.im/build to GitHub Pages.
-# In the repository's Pages settings, set the source to "GitHub Actions" and
-# the custom domain to bnb.im (static/CNAME carries it too).
 name: Deploy bnb.im
 
+# bnb.im is static: build it and publish apps/bnb.im/build to GitHub Pages. ci.yml calls this from
+# main once its checks pass and bnb.im changed; it can also be run by hand (Actions > Deploy bnb.im
+# > Run workflow). Before turning it on, set the repository's Pages source to "GitHub Actions" and
+# its custom domain to bnb.im (static/CNAME carries it too), then set the BNB_IM_PAGES variable to
+# "true".
 on:
-  push:
-    branches: [main]
-    paths:
-      - apps/bnb.im/**
-      - packages/**
-      - package-lock.json
+  workflow_call:
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+permissions: {}
 
 concurrency:
   group: pages
@@ -24,31 +18,40 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version-file: .tool-versions
-          cache: npm
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .node-version
       - run: npm ci
-      # Bluesky embeds are cached between builds (they fall back to the cache
-      # if the AppView is unreachable)
-      - uses: actions/cache@v4
+      # Bluesky embeds are cached between builds (they fall back to the cache if the AppView is
+      # unreachable). Restored only: main's runs in ci.yml save it, and nothing a pull request
+      # caches is visible here.
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: apps/bnb.im/.cache
           key: bnb-im-cache-${{ github.run_id }}
           restore-keys: bnb-im-cache-
       - run: npm run build -w apps/bnb.im
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: apps/bnb.im/build
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
