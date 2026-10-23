@@ -27,13 +27,13 @@
     "@atproto/lexicon": "^0.7.16",
     "@atproto/oauth-client-browser": "^0.5.9",
     "@types/markdown-it": "^14.1.2",
-    "@vitest/browser": "^5.0.3",
-    "@vitest/browser-playwright": "^5.0.3",
-    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/browser": "^5.0.5",
+    "@vitest/browser-playwright": "^5.0.5",
+    "@vitest/coverage-v8": "^5.0.5",
     "esbuild": "^0.28.2",
     "fast-check": "^4.10.2",
     "markdown-it": "^15.0.2",
     "playwright": "^1.63.0",
-    "vitest": "^5.0.3"
+    "vitest": "^5.0.5"
   }
 }
