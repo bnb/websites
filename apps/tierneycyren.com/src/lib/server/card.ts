@@ -21,6 +21,8 @@ const MAGENTA = '#ff3df2';
 /** the record, off the right edge, and its label */
 const RECORD = { x: 680, y: 35, size: 560 };
 const LABEL = 320;
+/** the record's cyan glow: a 60px blur (σ 30), which fades out within 3σ of the edge */
+const GLOW = { deviation: 30, reach: 90 };
 
 /** cover formats satori can draw */
 const COVER_TYPES = new Set(['image/jpeg', 'image/png']);
@@ -59,6 +61,7 @@ function fan(x: number, y: number, from: number, to: number, color: string) {
 /** satori takes React-element-shaped plain objects, so no JSX needed. */
 export function card({ cover, summary }: { cover: string | null; summary: string }) {
 	const middle = RECORD.size / 2;
+	const glow = RECORD.size + GLOW.reach * 2;
 	const grooves = Array.from({ length: 18 }, (_, i) =>
 		node('circle', {
 			cx: middle,
@@ -104,6 +107,34 @@ export function card({ cover, summary }: { cover: string | null; summary: string
 				style: { position: 'absolute', left: 0, top: 0 },
 				children: [...fan(-90, 720, 20, 88, CYAN), ...fan(1290, 720, 98, 168, MAGENTA)]
 			}),
+			// The glow a box-shadow would draw, with the blur's region cut to what it reaches.
+			// satori pads a box-shadow's filter by blur²/4 (900px a side here), and resvg
+			// blurring all of that took most of each render.
+			node('svg', {
+				width: glow,
+				height: glow,
+				viewBox: `0 0 ${glow} ${glow}`,
+				style: { position: 'absolute', left: RECORD.x - GLOW.reach, top: RECORD.y - GLOW.reach },
+				children: [
+					node('filter', {
+						id: 'glow',
+						filterUnits: 'userSpaceOnUse',
+						x: 0,
+						y: 0,
+						width: glow,
+						height: glow,
+						children: [node('feGaussianBlur', { stdDeviation: GLOW.deviation })]
+					}),
+					node('circle', {
+						cx: glow / 2,
+						cy: glow / 2,
+						r: middle,
+						fill: CYAN,
+						fillOpacity: 0.25,
+						filter: 'url(#glow)'
+					})
+				]
+			}),
 			node('div', {
 				style: {
 					position: 'absolute',
@@ -115,8 +146,7 @@ export function card({ cover, summary }: { cover: string | null; summary: string
 					alignItems: 'center',
 					justifyContent: 'center',
 					borderRadius: middle,
-					backgroundColor: '#07040d',
-					boxShadow: `0 0 60px rgba(0, 240, 255, 0.25)`
+					backgroundColor: '#07040d'
 				},
 				children: [
 					node('svg', {
