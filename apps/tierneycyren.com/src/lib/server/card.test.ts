@@ -82,11 +82,12 @@ describe('fetchCover', () => {
 
 	it('gives null for anything satori can’t draw, a failed response or a network error', async () => {
 		const webp = respond(PIXEL, { headers: { 'content-type': 'image/webp' } });
+		const untyped = respond(PIXEL, {});
 		const missing = respond('gone', { status: 404, headers: { 'content-type': 'image/png' } });
 		const offline = vi.fn(async () => {
 			throw new TypeError('fetch failed');
 		}) as unknown as typeof fetch;
-		for (const fetchFn of [webp, missing, offline]) {
+		for (const fetchFn of [webp, untyped, missing, offline]) {
 			await expect(fetchCover('https://images.example/cover', fetchFn)).resolves.toBeNull();
 		}
 	});

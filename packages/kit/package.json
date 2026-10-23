@@ -19,8 +19,8 @@
   "devDependencies": {
     "@bnb/testing": "^0.0.0",
     "@sveltejs/kit": "^2.70.3",
-    "@vitest/coverage-v8": "^5.0.3",
-    "vitest": "^5.0.3"
+    "@vitest/coverage-v8": "^5.0.5",
+    "vitest": "^5.0.5"
   },
   "dependencies": {
     "evlog": "^2.30.1"
