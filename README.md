@@ -30,7 +30,8 @@ packages/
   standard-site/     @bnb/standard-site: standard.site without a site generator: Markdown → leaflet
                      records, syncing them to the PDS, and the subscribe, upvote and comments elements
   testing/           @bnb/testing: the axe check every end-to-end suite runs, the Lighthouse budget,
-                     capturing evlog output in unit tests
+                     capturing evlog output in unit tests, and checking satori can read the share
+                     cards' fonts
 docs/features/       what each site does
 ```
 

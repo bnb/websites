@@ -2,13 +2,14 @@
   "name": "@bnb/testing",
   "version": "0.0.0",
   "private": true,
-  "description": "Shared test helpers: the axe accessibility check every site's end-to-end suite runs, the Lighthouse CI budget, and capturing evlog output.",
+  "description": "Shared test helpers: the axe accessibility check every site's end-to-end suite runs, the Lighthouse CI budget, capturing evlog output, and checking satori can read a share card's fonts.",
   "type": "module",
   "exports": {
     "./a11y": "./src/a11y.ts",
     "./lighthouse": "./src/lighthouse.cjs",
     "./logs": "./src/logs.ts",
-    "./playwright": "./src/playwright.ts"
+    "./playwright": "./src/playwright.ts",
+    "./satori": "./src/satori.ts"
   },
   "peerDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -18,6 +19,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "evlog": "^2.30.1",
-    "playwright": "^1.63.0"
+    "playwright": "^1.63.0",
+    "satori": "^0.33.5"
   }
 }
