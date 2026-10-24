@@ -50,6 +50,8 @@
     "@sveltejs/kit": {
       "cookie": "^0.7.2"
     },
-    "fflate": "^0.8.2"
+    "satori": {
+      "fflate": "^0.7.5"
+    }
   }
 }

@@ -34,7 +34,7 @@ type Fonts = Parameters<typeof satori>[1]['fonts'];
 const bytes = (url: string) => Buffer.from(url.slice(url.indexOf(',') + 1), 'base64');
 
 let fonts: Fonts | undefined;
-const loadFonts = (): Fonts =>
+export const loadFonts = (): Fonts =>
 	(fonts ??= [
 		{ name: 'Archivo Narrow', weight: 700, style: 'normal', data: bytes(narrowFont) },
 		{ name: 'IBM Plex Mono', weight: 500, style: 'normal', data: bytes(monoFont) }

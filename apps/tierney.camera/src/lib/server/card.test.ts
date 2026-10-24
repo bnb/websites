@@ -1,5 +1,6 @@
+import { unreadableFonts } from '@bnb/testing/satori';
 import { describe, expect, it } from 'vitest';
-import { card, nameSize } from './card';
+import { card, loadFonts, nameSize } from './card';
 
 interface Node {
 	type: string;
@@ -64,5 +65,11 @@ describe('nameSize', () => {
 		expect(nameSize(13, 150)).toBe(108);
 		expect(nameSize(26, 150)).toBe(54);
 		expect(nameSize(3, 150)).toBe(150);
+	});
+});
+
+describe('loadFonts', () => {
+	it('gives satori fonts it draws, not as missing-glyph boxes', async () => {
+		await expect(unreadableFonts(loadFonts())).resolves.toEqual([]);
 	});
 });

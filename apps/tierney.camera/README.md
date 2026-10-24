@@ -140,7 +140,7 @@ SvelteKit stack. What it shares:
 - `@bnb/ui`: the camera theme (`themes/camera.css`) and the shared `BigName` (masthead), `Marquee`
   (ticker), `Facts` and `Signoff` (footer), `SkipLink` and `Seo` components (the error page is the
   camera's own: a blown-out frame on a contact sheet)
-- `@bnb/testing`: the axe helper and the Lighthouse budget
+- `@bnb/testing`: the axe helper, the Lighthouse budget and the share card's font check
 
 Linting (oxlint, e18e), formatting (oxfmt), knip and Storybook are configured once at the root; the stories
 next to each component render, and are checked with axe, in the styleguide (`apps/styleguide`).

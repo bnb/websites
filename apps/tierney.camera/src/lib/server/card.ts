@@ -41,7 +41,7 @@ const font = (name: string, weight: 500 | 900, url: string) => ({
 const DISPLAY = 'Archivo, Archivo Ext';
 const MONO = 'IBM Plex Mono, IBM Plex Mono Ext';
 
-const loadFonts = (): Fonts =>
+export const loadFonts = (): Fonts =>
 	(fonts ??= [
 		font('Archivo', 900, archivo),
 		font('Archivo Ext', 900, archivoExt),

@@ -1,6 +1,7 @@
+import { unreadableFonts } from '@bnb/testing/satori';
 import { describe, expect, it } from 'vitest';
 import { HEIGHT, WIDTH } from '../social-size';
-import { card, socialImage, truncate } from './social';
+import { card, loadFonts, socialImage, truncate } from './social';
 
 interface Node {
 	type: string;
@@ -96,5 +97,11 @@ describe('socialImage', () => {
 		});
 		expect(u32(png, 16)).toBe(1200);
 		expect(u32(png, 20)).toBe(630);
+	});
+});
+
+describe('loadFonts', () => {
+	it('gives satori fonts it draws, not as missing-glyph boxes', async () => {
+		await expect(unreadableFonts(loadFonts())).resolves.toEqual([]);
 	});
 });

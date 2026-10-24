@@ -44,7 +44,7 @@ const FONT_FILES: Array<{ name: string; weight: Weight; files: string[] }> = [
 
 let fonts: Parameters<typeof satori>[1]['fonts'] | undefined;
 
-function loadFonts() {
+export function loadFonts() {
 	fonts ??= FONT_FILES.flatMap(({ name, weight, files }) =>
 		files.map((file) => ({
 			name,
