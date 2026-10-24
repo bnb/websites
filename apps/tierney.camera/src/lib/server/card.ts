@@ -4,9 +4,9 @@
 // the name alone, set bigger. satori lays it out as SVG and resvg rasterises it,
 // as bnb.im does for its post covers. The fonts come from Fontsource, inlined
 // into the server build so the running server never reads them from
-// node_modules (IBM Plex Mono is only a dev dependency). satori can't read woff2
-// or a variable font's width axis, so the name is set in the static (normal
-// width) 900 cut.
+// node_modules (IBM Plex Mono is only a dev dependency). satori draws a variable
+// font at its default instance, without the width axis, so the name is set in
+// the static (normal width) 900 cut.
 import archivo from '@fontsource/archivo/files/archivo-latin-900-normal.woff?inline';
 import archivoExt from '@fontsource/archivo/files/archivo-latin-ext-900-normal.woff?inline';
 import mono from '@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff?inline';
@@ -39,7 +39,8 @@ const font = (name: string, weight: 500 | 900, url: string) => ({
 // satori only falls back to another font for a missing glyph (ƒ, say) across
 // families, not between two cuts of one.
 const DISPLAY = 'Archivo, Archivo Ext';
-const MONO = 'IBM Plex Mono, IBM Plex Mono Ext';
+/** the caption and footer; the weight is set because satori fakes a bold 900 from the 500 cut */
+const MONO = { fontFamily: 'IBM Plex Mono, IBM Plex Mono Ext', fontWeight: 500, fontSize: 20 };
 
 export const loadFonts = (): Fonts =>
 	(fonts ??= [
@@ -75,9 +76,11 @@ export function nameSize(letters: number, max: number): number {
 	return Math.min(max, Math.floor((CARD_WIDTH - 2 * PAD) / (letters * CAPITAL_EM)));
 }
 
+// satori sizes boxes like browsers (content-box), so the padding goes inside the card
 const root = {
 	width: '100%',
 	height: '100%',
+	boxSizing: 'border-box',
 	flexDirection: 'column',
 	padding: PAD,
 	backgroundColor: BG,
@@ -96,15 +99,18 @@ export function card({ name, photo, caption }: CardContent): Element {
 					fontSize: size,
 					lineHeight: 0.8,
 					letterSpacing: -0.02 * size,
+					// satori ends a line with its letter spacing too (like browsers); this keeps the
+					// flush-right last name off the margin by the same amount it always was
+					marginRight: 0.02 * size,
 					color: i === lines.length - 1 ? ACCENT : INK
 				},
 				text
 			)
 		);
-	const footer = box(
-		{ justifyContent: 'space-between', marginTop: 24, fontFamily: MONO, fontSize: 20 },
-		[box({ color: DIM }, 'PHOTOGRAPHY'), box({ color: ACCENT }, caps(SITE_NAME))]
-	);
+	const footer = box({ justifyContent: 'space-between', marginTop: 24, ...MONO }, [
+		box({ color: DIM }, 'PHOTOGRAPHY'),
+		box({ color: ACCENT }, caps(SITE_NAME))
+	]);
 
 	if (!photo) {
 		// in type alone: one name per line, as big as the longer allows
@@ -132,8 +138,7 @@ export function card({ name, photo, caption }: CardContent): Element {
 					gap: 24,
 					padding: '14px 20px',
 					backgroundColor: BG,
-					fontFamily: MONO,
-					fontSize: 20
+					...MONO
 				},
 				caption.map((text, i) => box({ color: i ? DIM : INK }, caps(text)))
 			)

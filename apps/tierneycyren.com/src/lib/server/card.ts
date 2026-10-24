@@ -204,7 +204,16 @@ export function card({ cover, summary }: { cover: string | null; summary: string
 						]
 					}),
 					node('div', {
-						style: { display: 'flex', gap: 28, fontSize: 24, letterSpacing: 2 },
+						// satori adds the letter spacing after every character, spaces and the last
+						// letter too (like browsers); the word spacing and the narrower gap take it back
+						// out, so the line keeps its tighter set
+						style: {
+							display: 'flex',
+							gap: 26,
+							fontSize: 24,
+							letterSpacing: 2,
+							wordSpacing: -2
+						},
 						children: [
 							...(summary
 								? [node('div', { style: { color: DIM }, children: summary.toUpperCase() })]
