@@ -19,6 +19,6 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
-    "@atproto/oauth-client-browser": "^0.5.9"
+    "@atproto/oauth-client-browser": "^0.5.10"
   }
 }
