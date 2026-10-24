@@ -76,6 +76,8 @@ export function card({ title, description, date }: CardData) {
 			style: {
 				width: '100%',
 				height: '100%',
+				// satori sizes boxes like browsers (content-box), so the padding goes inside the card
+				boxSizing: 'border-box',
 				display: 'flex',
 				flexDirection: 'column',
 				backgroundColor: '#ffffff',
