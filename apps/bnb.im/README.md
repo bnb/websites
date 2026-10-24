@@ -111,6 +111,8 @@ npm run lighthouse    # Lighthouse CI on the index, a post and the series page
 
 ## Deploy
 
-`.github/workflows/deploy-bnb.im.yml` builds on pushes to `main` and publishes `build/` to GitHub Pages.
-Set the repository's Pages source to "GitHub Actions" and its custom domain to `bnb.im`. `404.html` is
-prerendered for missing paths.
+`.github/workflows/deploy-bnb.im.yml` publishes `build/` to GitHub Pages. CI calls it on pushes to `main`
+that change bnb.im, once its checks pass and the `BNB_IM_PAGES` repository variable is `true`; it can also
+be run by hand. It needs the repository's Pages source set to "GitHub Actions" and its custom domain set to
+`bnb.im`, which only one repository can hold, so the old `bnb/bnb.im` repo's Pages site has to let go of it
+first. `404.html` is prerendered for missing paths.

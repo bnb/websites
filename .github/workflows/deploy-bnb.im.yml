@@ -38,9 +38,12 @@ jobs:
           key: bnb-im-cache-${{ github.run_id }}
           restore-keys: bnb-im-cache-
       - run: npm run build -w apps/bnb.im
+      # Since v4 the artifact leaves out dotfiles unless asked, which would drop
+      # .well-known/site.standard.publication (standard.site's verification file).
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: apps/bnb.im/build
+          include-hidden-files: true
 
   deploy:
     needs: build

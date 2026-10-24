@@ -1,0 +1,16 @@
+// audit-ci's configuration (see npm-advisories.yml): `npm audit --omit=dev`, failing on an advisory
+// of any severity except the ones allowlisted here. On a failure, the summary lists each advisory
+// and the path to the package it's in.
+{
+	"$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+	"low": true,
+	"extra-args": ["--omit=dev"],
+	"report-type": "summary",
+	"allowlist": [
+		// https://github.com/advisories/GHSA-mrhx-c7xc-m3w5: zod <4.6.6 can exhaust memory validating
+		// oversized collections. The copies are zod 3.25.76, the last 3.x, under @atproto/* and
+		// @atproto-labs/*, whose latest releases still ask for zod ^3.23.8. Remove this once they
+		// depend on zod >=4.6.6.
+		"GHSA-mrhx-c7xc-m3w5"
+	]
+}
