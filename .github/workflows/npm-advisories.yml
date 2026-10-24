@@ -1,9 +1,10 @@
 name: npm advisories
 
 # Known vulnerabilities in the npm packages the sites run. Pull requests and pushes that change the
-# lockfile, and weekly for advisories published between them. Only production dependencies: the
-# dev tooling's advisories don't reach anyone visiting the sites, and Dependabot updates them
-# monthly.
+# lockfile or the allowlist, and weekly for advisories published between them. Only production
+# dependencies: the dev tooling's advisories don't reach anyone visiting the sites, and Dependabot
+# updates them monthly. audit-ci runs `npm audit` and skips the advisories allowlisted in
+# .github/audit-ci.jsonc, which says why each one is there and when to remove it.
 on:
   push:
     branches: [main]
@@ -51,6 +52,7 @@ jobs:
           filters: |
             run:
               - 'package-lock.json'
+              - '.github/audit-ci.jsonc'
               - '.github/workflows/npm-advisories.yml'
 
   audit:
@@ -65,8 +67,8 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .node-version
-      # Reads package-lock.json alone: nothing is installed.
-      - run: npm audit --omit=dev
+      # Reads package-lock.json alone: only audit-ci itself is installed.
+      - run: npx --yes audit-ci@7.1.0 --config .github/audit-ci.jsonc
 
   # The check to require on main: it fails if any job above failed or was cancelled, and passes
   # when they all passed or were skipped because nothing they check changed.
