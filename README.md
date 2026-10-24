@@ -156,6 +156,7 @@ Dependabot:
 - `scheduled.yml`, weekly: every site's end-to-end tests in Chromium, Firefox and WebKit, and
   Lighthouse, which also catches the live AT Protocol data breaking a page. A failed run opens an
   issue, and the next run that passes closes it.
-- `npm-advisories.yml` (`npm audit --omit=dev`, on lockfile changes and weekly) and
-  `dependency-review.yml` (advisories and licences of the dependencies a pull request adds).
+- `npm-advisories.yml` (`npm audit --omit=dev` through audit-ci, on lockfile changes and weekly,
+  skipping the advisories allowlisted in `.github/audit-ci.jsonc`) and `dependency-review.yml`
+  (advisories and licences of the dependencies a pull request adds).
 - `workflow-lint.yml`: actionlint and zizmor on the workflows themselves.
